@@ -10,7 +10,7 @@ export const PRODUCTS: Product[] = [
     slug: "pulover-fleece-hombre-negro",
     name: "Pulóver Fleece (Hombre) — Negro",
     category: "Hombre",
-    price: 55,
+    price: 12,
     badge: "Best seller",
     featured: true,
     images: [
@@ -30,7 +30,7 @@ export const PRODUCTS: Product[] = [
     slug: "pulover-tech-knit-unisex-beige",
     name: "Pulóver Tech Knit (Unisex) — Beige",
     category: "Hombre",
-    price: 62,
+    price: 12,
     badge: "Nuevo",
     images: [
       "/products/pullovers/photo_3_2026-07-11_16-01-25.jpg",
@@ -45,8 +45,8 @@ export const PRODUCTS: Product[] = [
     id: "pullover-003",
     slug: "pulover-cropped-training-mujer-hueso",
     name: "Pulóver Cropped Training (Mujer) — Hueso",
-    category: "Mujer",
-    price: 49,
+    category: "Hombre",
+    price: 12,
     images: [
       "/products/pullovers/photo_4_2026-07-11_16-01-25.jpg",
     ],
@@ -57,9 +57,9 @@ export const PRODUCTS: Product[] = [
   {
     id: "pullover-004",
     slug: "pulover-half-zip-performance-mujer-gris",
-    name: "Pulóver Half-Zip Performance (Mujer) — Gris",
-    category: "Mujer",
-    price: 58,
+    name: "Pulóver Half-Zip Performance ",
+    category: "Hombre",
+    price: 12,
     featured: true,
     images: [
       "/products/pullovers/photo_5_2026-07-11_16-01-25.jpg",
@@ -73,7 +73,7 @@ export const PRODUCTS: Product[] = [
     slug: "pulover-half-s",
     name: "Pulóver Half-Zip Performance (Hombre) — Gris",
     category: "Hombre",
-    price: 58,
+    price: 12,
     featured: true,
     images: [
       "/products/pullovers/photo_25_2026-07-11_16-01-25.jpg",
@@ -96,7 +96,7 @@ export const PRODUCTS: Product[] = [
     slug: "shorts-training-7-hombre-negro",
     name: "Shorts Training 7” (Hombre) — Negro",
     category: "Hombre",
-    price: 35,
+    price: 15,
     badge: "-15%",
     images: [
       "/products/shorts/photo_13_2026-07-11_16-01-25.jpg",
@@ -111,7 +111,7 @@ export const PRODUCTS: Product[] = [
     slug: "shorts-2en1-hombre-beige",
     name: "Shorts 2 en 1 (Hombre) — Beige",
     category: "Hombre",
-    price: 42,
+    price: 15,
     featured: true,
     images: [
       "/products/shorts/photo_10_2026-07-11_16-01-25.jpg",
@@ -127,7 +127,7 @@ export const PRODUCTS: Product[] = [
     slug: "shorts-seamless-mujer-negro",
     name: "Shorts Seamless (Mujer) — Negro",
     category: "Mujer",
-    price: 33,
+    price: 15,
     badge: "Best seller",
     images: [
       "/products/shorts/photo_9_2026-07-11_16-01-25.jpg",
@@ -144,7 +144,7 @@ export const PRODUCTS: Product[] = [
     slug: "shorts-biker-mujer-hueso",
     name: "Shorts Biker Compression (Mujer) — Hueso",
     category: "Mujer",
-    price: 37,
+    price: 15,
     images: [
       "/products/shorts/photo_18_2026-07-11_16-01-25.jpg",
       "/products/shorts/photo_16_2026-07-11_16-01-25.jpg",
@@ -160,7 +160,7 @@ export const PRODUCTS: Product[] = [
     slug: "shorts-biker-mujer-hueso",
     name: "Shorts Biker Compression (Mujer) — Hueso",
     category: "Mujer",
-    price: 37,
+    price: 15,
     images: [
       "/products/shorts/photo_24_2026-07-11_16-01-25.jpg",
       "/products/shorts/photo_23_2026-07-11_16-01-25.jpg",
@@ -178,7 +178,7 @@ export const PRODUCTS: Product[] = [
     slug: "shorts-biker-mujer-hueso",
     name: "Shorts Biker Compression (Mujer) — Hueso",
     category: "Mujer",
-    price: 37,
+    price: 15,
     images: [
       "/products/shorts/photo_38_2026-07-11_16-01-25.jpg",
       "/products/shorts/photo_35_2026-07-11_16-01-25.jpg",
