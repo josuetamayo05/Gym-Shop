@@ -7,16 +7,19 @@ export const PRODUCTS: Product[] = [
   // -------------------------
   {
     id: "pullover-001",
-    slug: "pulover-fleece-oversize-hombre-negro",
-    name: "Pulóver Fleece Oversize (Hombre) — Negro",
+    slug: "pulover-fleece-hombre-negro",
+    name: "Pulóver Fleece (Hombre) — Negro",
     category: "Hombre",
     price: 55,
     badge: "Best seller",
     featured: true,
     images: [
-      "/products/pullovers/pullover-001-1.jpg",
-      "/products/pullovers/pullover-001-2.jpg",
-      "/products/pullovers/pullover-001-3.jpg",
+      "/products/pullovers/photo_44_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_1_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_2_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_3_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_4_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_5_2026-07-11_16-01-25.jpg",
     ],
     description:
       "Pulóver fleece de tacto suave con fit oversize. Ideal para pre/pos entreno. Puños elásticos y cuello redondo.",
@@ -30,7 +33,7 @@ export const PRODUCTS: Product[] = [
     price: 62,
     badge: "Nuevo",
     images: [
-      "/products/pullovers/pullover-002-1.jpg",
+      "/products/pullovers/photo_3_2026-07-11_16-01-25.jpg",
       "/products/pullovers/pullover-002-2.jpg",
       "/products/pullovers/pullover-002-3.jpg",
     ],
