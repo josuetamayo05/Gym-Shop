@@ -1,4 +1,5 @@
 import type { Product } from "../types";
+import { AccordionSection } from "./AccordionSection";
 
 type CategoryFilter = "Todos" | Product["category"];
 
@@ -36,13 +37,9 @@ export function FiltersContent({
   const categories: CategoryFilter[] = ["Todos", "Accesorios", "Hombre", "Mujer"];
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-3xl border border-black/10 bg-white p-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-black/50">
-          Categoría
-        </p>
-
-        <div className="mt-3 flex flex-wrap gap-2">
+    <div className="space-y-3">
+      <AccordionSection title="Categoría" defaultOpen>
+        <div className="flex flex-wrap gap-2">
           {categories.map((c) => {
             const active = c === category;
             return (
@@ -61,21 +58,17 @@ export function FiltersContent({
             );
           })}
         </div>
-      </div>
+      </AccordionSection>
 
-      <div className="rounded-3xl border border-black/10 bg-white p-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-black/50">
-          Talles
-        </p>
-
-        <div className="mt-3 grid grid-cols-2 gap-2">
+      <AccordionSection title="Tallas" defaultOpen>
+        <div className="grid grid-cols-2 gap-2">
           {sizes.map((s) => {
             const checked = selectedSizes.includes(s);
             return (
               <label
                 key={s}
                 className={
-                  "flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-semibold transition " +
+                  "flex cursor-pointer items-center justify-center rounded-2xl border px-3 py-2 text-sm font-semibold transition " +
                   (checked
                     ? "border-black bg-black text-white"
                     : "border-black/10 bg-white hover:bg-black/5")
@@ -87,23 +80,19 @@ export function FiltersContent({
                   checked={checked}
                   onChange={() => onToggleSize(s)}
                 />
-                <span>{s}</span>
+                {s}
               </label>
             );
           })}
         </div>
 
         <p className="mt-3 text-xs text-black/50">
-          Tip: si no elegís talle, se muestran todos.
+          Si no elegís talla, se muestran todos.
         </p>
-      </div>
+      </AccordionSection>
 
-      <div className="rounded-3xl border border-black/10 bg-white p-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-black/50">
-          Precio (USD)
-        </p>
-
-        <div className="mt-3 grid grid-cols-2 gap-2">
+      <AccordionSection title="Precio (USD)" defaultOpen={false}>
+        <div className="grid grid-cols-2 gap-2">
           <div>
             <p className="text-xs text-black/50">Mín</p>
             <input
@@ -130,9 +119,9 @@ export function FiltersContent({
         </div>
 
         <p className="mt-3 text-xs text-black/50">
-          Rango recomendado: {minBound} – {maxBound}
+          Rango: {minBound} – {maxBound}
         </p>
-      </div>
+      </AccordionSection>
 
       <button
         onClick={onClear}

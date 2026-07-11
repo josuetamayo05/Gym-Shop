@@ -5,50 +5,79 @@ import { formatMoney } from "../utils/money";
 import { useCartStore } from "../store/cartStore";
 import { useUIStore } from "../store/uiStore";
 import { QuickAddDialog } from "./QuickAddDialog";
+import { QuickViewDialog } from "./QuickViewDialog";
 
 export function ProductCard({ product }: { product: Product }) {
-  const [open, setOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const add = useCartStore((s) => s.add);
   const setCartOpen = useUIStore((s) => s.setCartOpen);
 
   function handleQuickAdd() {
-    // Si solo tiene un talle (ej: "Único"), lo agregamos directo sin modal
     if (product.sizes.length === 1) {
       add(product, product.sizes[0]);
       setCartOpen(true);
       return;
     }
-    setOpen(true);
+    setQuickAddOpen(true);
   }
 
   return (
     <>
       <article className="group overflow-hidden rounded-3xl border border-black/10 bg-white">
-        <div className="relative aspect-[4/5] overflow-hidden bg-black/5">
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-            loading="lazy"
-          />
+        <button
+          type="button"
+          onClick={() => setQuickViewOpen(true)}
+          className="relative block w-full text-left"
+          aria-label="Abrir vista rápida"
+        >
+          <div className="relative aspect-[4/5] overflow-hidden bg-black/5">
+            {!imgLoaded && (
+              <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-black/5 via-black/10 to-black/5" />
+            )}
 
-          {product.badge && (
-            <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black backdrop-blur">
-              {product.badge}
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              onLoad={() => setImgLoaded(true)}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              loading="lazy"
+            />
+
+            {product.badge && (
+              <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black backdrop-blur">
+                {product.badge}
+              </div>
+            )}
+
+            {/* CTA overlay (desktop hover) */}
+            <div className="pointer-events-none absolute inset-x-3 bottom-3 flex gap-2 opacity-0 transition group-hover:opacity-100">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleQuickAdd();
+                }}
+                className="pointer-events-auto flex-1 rounded-2xl bg-[#D8C3A5] px-4 py-2 text-sm font-semibold text-black"
+              >
+                Añadir
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setQuickViewOpen(true);
+                }}
+                className="pointer-events-auto rounded-2xl border border-white/40 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur"
+              >
+                Ver
+              </button>
             </div>
-          )}
-
-          {/* Quick Add overlay (desktop hover) */}
-          <div className="pointer-events-none absolute inset-x-3 bottom-3 opacity-0 transition group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100">
-            <button
-              onClick={handleQuickAdd}
-              className="pointer-events-auto w-full rounded-2xl bg-[#D8C3A5] px-4 py-2 text-sm font-semibold text-black"
-            >
-              Añadir
-            </button>
           </div>
-        </div>
+        </button>
 
         <div className="space-y-2 p-4">
           <div className="flex items-start justify-between gap-3">
@@ -61,26 +90,42 @@ export function ProductCard({ product }: { product: Product }) {
             <p className="text-sm font-semibold">{formatMoney(product.price)}</p>
           </div>
 
-          {/* Acciones (mobile/siempre visibles) */}
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-2">
+          {/* Acciones mobile */}
+          <div className="grid grid-cols-2 gap-2 md:hidden">
             <button
               onClick={handleQuickAdd}
-              className="rounded-2xl bg-[#0B0B0C] px-4 py-2 text-sm font-semibold text-white hover:bg-black/90 md:hidden"
+              className="rounded-2xl bg-[#0B0B0C] px-4 py-2 text-sm font-semibold text-white hover:bg-black/90"
             >
               Añadir
             </button>
-
-            <Link
-              to={`/producto/${product.id}`}
-              className="col-span-2 rounded-2xl border border-black/10 bg-white px-4 py-2 text-center text-sm font-semibold hover:bg-black/5 md:col-span-2"
+            <button
+              onClick={() => setQuickViewOpen(true)}
+              className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
             >
-              Ver detalle
-            </Link>
+              Ver
+            </button>
           </div>
+
+          <Link
+            to={`/producto/${product.id}`}
+            className="hidden w-full rounded-2xl border border-black/10 bg-white px-4 py-2 text-center text-sm font-semibold hover:bg-black/5 md:block"
+          >
+            Ver detalle
+          </Link>
         </div>
       </article>
 
-      <QuickAddDialog product={product} open={open} onOpenChange={setOpen} />
+      <QuickAddDialog
+        product={product}
+        open={quickAddOpen}
+        onOpenChange={setQuickAddOpen}
+      />
+
+      <QuickViewDialog
+        product={product}
+        open={quickViewOpen}
+        onOpenChange={setQuickViewOpen}
+      />
     </>
   );
 }
