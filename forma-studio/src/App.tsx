@@ -10,7 +10,7 @@ export default function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Catalog />} />
-        <Route path="/producto/:id" element={<ProductDetail />} />
+        <Route path="/producto/:slug" element={<ProductDetail />} />
       </Routes>
       <CartDrawer />
     </BrowserRouter>

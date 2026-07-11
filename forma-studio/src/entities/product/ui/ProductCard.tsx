@@ -107,7 +107,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
 
           <Link
-            to={`/producto/${product.id}`}
+            to={`/producto/${product.slug}`}
             className="hidden w-full rounded-2xl border border-black/10 bg-white px-4 py-2 text-center text-sm font-semibold hover:bg-black/5 md:block"
           >
             Ver detalle

@@ -1,44 +1,81 @@
 import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
+
 import { getProductBySlug } from "../entities/product/model/selectors";
+import { ProductGallery } from "../components/ProductGallery";
+import { formatMoney } from "../utils/money";
 import { useCartStore } from "../store/cartStore";
 import { useUIStore } from "../store/uiStore";
-import { formatMoney } from "../utils/money";
 
 export function ProductDetail() {
   const { slug } = useParams();
+  return <ProductDetailView key={slug} slug={slug ?? ""} />;
+}
+
+function ProductDetailView({ slug }: { slug: string }) {
+  const navigate = useNavigate();
+  const add = useCartStore((s) => s.add);
+  const setCartOpen = useUIStore((s) => s.setCartOpen);
 
   const product = useMemo(() => {
     if (!slug) return undefined;
     return getProductBySlug(slug);
   }, [slug]);
 
-  const add = useCartStore((s) => s.add);
-  const setCartOpen = useUIStore((s) => s.setCartOpen);
-
   const [size, setSize] = useState<string>("");
 
   if (!product) {
-    return <div className="mx-auto max-w-4xl px-4 py-10">Producto no encontrado.</div>;
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <button
+          onClick={() => navigate("/")}
+          className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
+        >
+          Volver al catálogo
+        </button>
+
+        <div className="mt-6 rounded-3xl border border-black/10 bg-black/[0.02] p-6 text-sm text-black/60">
+          Producto no encontrado.
+        </div>
+      </main>
+    );
   }
 
-  const selectedSize = size || product.sizes[0];
+  const sizes = product.sizes?.length ? product.sizes : ["Único"];
+  const selectedSize = size || sizes[0];
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-3xl border border-black/10 bg-black/5">
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="h-full w-full object-cover"
-          />
-        </div>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Volver
+        </button>
 
-        <div>
-          <p className="text-xs uppercase tracking-widest text-black/50">{product.category}</p>
-          <h1 className="mt-2 text-2xl font-semibold">{product.name}</h1>
-          <p className="mt-2 text-lg font-semibold">{formatMoney(product.price)}</p>
+        <Link to="/" className="text-sm font-semibold text-black/60 hover:text-black">
+          Catálogo
+        </Link>
+      </div>
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <ProductGallery key={product.id} images={product.images} alt={product.name} />
+
+        <div className="lg:pl-2">
+          <p className="text-xs uppercase tracking-widest text-black/50">
+            {product.category}
+          </p>
+
+          <h1 className="mt-2 text-2xl font-semibold leading-tight">
+            {product.name}
+          </h1>
+
+          <p className="mt-2 text-lg font-semibold">
+            {formatMoney(product.price)}
+          </p>
 
           {product.description && (
             <p className="mt-3 text-sm text-black/70">{product.description}</p>
@@ -47,17 +84,18 @@ export function ProductDetail() {
           <div className="mt-6">
             <p className="text-sm font-semibold">Talla</p>
             <div className="mt-2 flex flex-wrap gap-2">
-              {product.sizes.map((s) => {
+              {sizes.map((s) => {
                 const active = selectedSize === s;
                 return (
                   <button
                     key={s}
                     onClick={() => setSize(s)}
-                    className={`rounded-2xl border px-4 py-2 text-sm font-semibold ${
-                      active
+                    className={
+                      "rounded-2xl border px-4 py-2 text-sm font-semibold transition " +
+                      (active
                         ? "border-black bg-black text-white"
-                        : "border-black/10 bg-white hover:bg-black/5"
-                    }`}
+                        : "border-black/10 bg-white hover:bg-black/5")
+                    }
                   >
                     {s}
                   </button>
@@ -75,8 +113,12 @@ export function ProductDetail() {
           >
             Añadir al carrito
           </button>
+
+          <p className="mt-2 text-xs text-black/50">
+            Luego enviás el pedido por WhatsApp desde el carrito.
+          </p>
         </div>
-      </div>
+      </section>
     </main>
   );
 }
