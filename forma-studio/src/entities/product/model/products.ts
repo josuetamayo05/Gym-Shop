@@ -48,9 +48,7 @@ export const PRODUCTS: Product[] = [
     category: "Mujer",
     price: 49,
     images: [
-      "/products/pullovers/pullover-003-1.jpg",
-      "/products/pullovers/pullover-003-2.jpg",
-      "/products/pullovers/pullover-003-3.jpg",
+      "/products/pullovers/photo_4_2026-07-11_16-01-25.jpg",
     ],
     description:
       "Pulóver cropped con fit cómodo y moderno. Perfecto para calentar, ir al gym o estilo athleisure.",
@@ -64,9 +62,26 @@ export const PRODUCTS: Product[] = [
     price: 58,
     featured: true,
     images: [
-      "/products/pullovers/pullover-004-1.jpg",
-      "/products/pullovers/pullover-004-2.jpg",
-      "/products/pullovers/pullover-004-3.jpg",
+      "/products/pullovers/photo_5_2026-07-11_16-01-25.jpg",
+    ],
+    description:
+      "Half-zip con cuello alto y estética sport-tech. Ideal para entrenamiento ligero, running o capas.",
+    sizes: ["XS", "S", "M", "L"],
+  },
+  {
+    id: "pullover-006",
+    slug: "pulover-half-s",
+    name: "Pulóver Half-Zip Performance (Hombre) — Gris",
+    category: "Hombre",
+    price: 58,
+    featured: true,
+    images: [
+      "/products/pullovers/photo_25_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_26_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_27_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_28_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_29_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_30_2026-07-11_16-01-25.jpg",
     ],
     description:
       "Half-zip con cuello alto y estética sport-tech. Ideal para entrenamiento ligero, running o capas.",
@@ -84,9 +99,8 @@ export const PRODUCTS: Product[] = [
     price: 35,
     badge: "-15%",
     images: [
-      "/products/shorts/shorts-001-1.jpg",
-      "/products/shorts/shorts-001-2.jpg",
-      "/products/shorts/shorts-001-3.jpg",
+      "/products/shorts/photo_13_2026-07-11_16-01-25.jpg",
+      "/products/photo_12_2026-07-11_16-01-25.jpg",
     ],
     description:
       "Shorts livianos con secado rápido. Cintura elástica con ajuste y bolsillos laterales discretos.",
@@ -100,7 +114,7 @@ export const PRODUCTS: Product[] = [
     price: 42,
     featured: true,
     images: [
-      "/products/shorts/shorts-002-1.jpg",
+      "/products/shorts/photo_10_2026-07-11_16-01-25.jpg",
       "/products/shorts/shorts-002-2.jpg",
       "/products/shorts/shorts-002-3.jpg",
     ],
@@ -116,9 +130,10 @@ export const PRODUCTS: Product[] = [
     price: 33,
     badge: "Best seller",
     images: [
-      "/products/shorts/shorts-003-1.jpg",
-      "/products/shorts/shorts-003-2.jpg",
-      "/products/shorts/shorts-003-3.jpg",
+      "/products/shorts/photo_9_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_8_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_6_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_7_2026-07-11_16-01-25.jpg",
     ],
     description:
       "Seamless de alta comodidad, cintura alta y ajuste firme. Ideal para pierna/glúteo y uso diario.",
@@ -131,9 +146,44 @@ export const PRODUCTS: Product[] = [
     category: "Mujer",
     price: 37,
     images: [
-      "/products/shorts/shorts-004-1.jpg",
-      "/products/shorts/shorts-004-2.jpg",
-      "/products/shorts/shorts-004-3.jpg",
+      "/products/shorts/photo_18_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_16_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_15_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_14_2026-07-11_16-01-25.jpg",
+    ],
+    description:
+      "Biker con compresión moderada y sensación suave. Perfecto para gym, yoga y looks minimal.",
+    sizes: ["XS", "S", "M", "L"],
+  },
+  {
+    id: "shorts-005",
+    slug: "shorts-biker-mujer-hueso",
+    name: "Shorts Biker Compression (Mujer) — Hueso",
+    category: "Mujer",
+    price: 37,
+    images: [
+      "/products/shorts/photo_24_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_23_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_22_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_21_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_20_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_19_2026-07-11_16-01-25.jpg",
+    ],
+    description:
+      "Biker con compresión moderada y sensación suave. Perfecto para gym, yoga y looks minimal.",
+    sizes: ["XS", "S", "M", "L"],
+  },
+  {
+    id: "shorts-006",
+    slug: "shorts-biker-mujer-hueso",
+    name: "Shorts Biker Compression (Mujer) — Hueso",
+    category: "Mujer",
+    price: 37,
+    images: [
+      "/products/shorts/photo_38_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_35_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_32_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_14_2026-07-11_16-01-25.jpg",
     ],
     description:
       "Biker con compresión moderada y sensación suave. Perfecto para gym, yoga y looks minimal.",
