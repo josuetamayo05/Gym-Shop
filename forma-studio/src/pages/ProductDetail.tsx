@@ -1,13 +1,17 @@
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { products } from "../data/products";
+import { getProductBySlug } from "../entities/product/model/selectors";
 import { useCartStore } from "../store/cartStore";
 import { useUIStore } from "../store/uiStore";
 import { formatMoney } from "../utils/money";
 
 export function ProductDetail() {
-  const { id } = useParams();
-  const product = useMemo(() => products.find((p) => p.id === id), [id]);
+  const { slug } = useParams();
+
+  const product = useMemo(() => {
+    if (!slug) return undefined;
+    return getProductBySlug(slug);
+  }, [slug]);
 
   const add = useCartStore((s) => s.add);
   const setCartOpen = useUIStore((s) => s.setCartOpen);

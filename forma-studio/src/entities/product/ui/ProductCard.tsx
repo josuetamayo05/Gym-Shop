@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import type { Product } from "../types";
-import { formatMoney } from "../utils/money";
-import { useCartStore } from "../store/cartStore";
-import { useUIStore } from "../store/uiStore";
-import { QuickAddDialog } from "./QuickAddDialog";
-import { QuickViewDialog } from "./QuickViewDialog";
+import type { Product } from "../../../types";
+import { formatMoney } from "../../../utils/money";
+import { useCartStore } from "../../../store/cartStore";
+import { useUIStore } from "../../../store/uiStore";
+import { QuickAddDialog } from "../../../components/QuickAddDialog";
+import { QuickViewDialog } from "../../../components/QuickViewDialog";
 
 export function ProductCard({ product }: { product: Product }) {
   const [quickAddOpen, setQuickAddOpen] = useState(false);

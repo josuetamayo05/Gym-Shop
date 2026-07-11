@@ -1,38 +1,55 @@
+// src/pages/Catalog.tsx
 import { useMemo, useState } from "react";
-import { SlidersHorizontal, Search } from "lucide-react";
-import { products } from "../data/products";
-import { ProductCard } from "../components/ProductCard";
+import { Search, SlidersHorizontal } from "lucide-react";
+
+import { PRODUCTS } from "../entities/product/model/products";
+import type { Product } from "../entities/product/model/types";
+
+import { ProductCard } from "../entities/product/ui/ProductCard";
 import { FiltersContent } from "../components/FiltersContent";
 import { MobileFiltersDrawer } from "../components/MobileFiltersDrawer";
-import type { Product } from "../types";
+import { EmptyState } from "../components/EmptyState";
 
 type CategoryFilter = "Todos" | Product["category"];
 type Sort = "reco" | "price_asc" | "price_desc" | "name_asc";
 
 export function Catalog() {
-  const minBound = useMemo(
-    () => Math.min(...products.map((p) => p.price)),
-    []
-  );
-  const maxBound = useMemo(
-    () => Math.max(...products.map((p) => p.price)),
-    []
-  );
-
-  const sizes = useMemo(() => {
-    const set = new Set<string>();
-    products.forEach((p) => p.sizes.forEach((s) => set.add(s)));
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, []);
-
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("Todos");
   const [sort, setSort] = useState<Sort>("reco");
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const { minBound, maxBound } = useMemo(() => {
+    if (PRODUCTS.length === 0) return { minBound: 0, maxBound: 0 };
+    const prices = PRODUCTS.map((p) => p.price);
+    return {
+      minBound: Math.min(...prices),
+      maxBound: Math.max(...prices),
+    };
+  }, []);
+
   const [priceMin, setPriceMin] = useState<number>(minBound);
   const [priceMax, setPriceMax] = useState<number>(maxBound);
 
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const sizes = useMemo(() => {
+    // Orden más “humano” para tallas
+    const order = ["Único", "XS", "S", "M", "L", "XL", "XXL"];
+    const set = new Set<string>();
+    PRODUCTS.forEach((p) => (p.sizes ?? []).forEach((s) => set.add(s)));
+
+    const list = Array.from(set);
+    list.sort((a, b) => {
+      const ia = order.indexOf(a);
+      const ib = order.indexOf(b);
+      if (ia !== -1 || ib !== -1) {
+        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+      }
+      return a.localeCompare(b);
+    });
+
+    return list;
+  }, []);
 
   function toggleSize(size: string) {
     setSelectedSizes((prev) =>
@@ -51,25 +68,30 @@ export function Catalog() {
 
   const activeFiltersCount = useMemo(() => {
     let n = 0;
+    if (query.trim().length > 0) n++;
     if (category !== "Todos") n++;
     if (selectedSizes.length > 0) n++;
     if (priceMin !== minBound || priceMax !== maxBound) n++;
-    if (query.trim().length > 0) n++;
     return n;
-  }, [category, selectedSizes.length, priceMin, priceMax, minBound, maxBound, query]);
+  }, [query, category, selectedSizes.length, priceMin, priceMax, minBound, maxBound]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-
     const min = Math.min(priceMin, priceMax);
     const max = Math.max(priceMin, priceMax);
 
-    let list = products.filter((p) => {
-      const matchQuery = q.length === 0 || p.name.toLowerCase().includes(q);
+    let list = PRODUCTS.filter((p) => {
+      const matchQuery =
+        q.length === 0 ||
+        p.name.toLowerCase().includes(q) ||
+        (p.description?.toLowerCase().includes(q) ?? false);
+
       const matchCat = category === "Todos" || p.category === category;
+
       const matchSizes =
         selectedSizes.length === 0 ||
-        p.sizes.some((s) => selectedSizes.includes(s));
+        (p.sizes ?? []).some((s) => selectedSizes.includes(s));
+
       const matchPrice = p.price >= min && p.price <= max;
 
       return matchQuery && matchCat && matchSizes && matchPrice;
@@ -84,7 +106,20 @@ export function Catalog() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
-      {/* Top bar: search + sort + mobile filters */}
+      {/* Hero simple (opcional) */}
+      <section className="mb-5 rounded-[28px] border border-black/10 bg-[#F7F3EE] p-6">
+        <p className="text-xs uppercase tracking-widest text-black/60">
+          GYM STUDIO
+        </p>
+        <h1 className="mt-2 text-2xl font-semibold leading-tight">
+          Catálogo — Pulóveres & Shorts
+        </h1>
+        <p className="mt-2 text-sm text-black/70">
+          Agrega al carrito y envía tu pedido por WhatsApp.
+        </p>
+      </section>
+
+      {/* Top bar: search + mobile filters + sort */}
       <section className="mb-5 space-y-3">
         <div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2">
           <Search className="h-4 w-4 text-black/50" />
@@ -92,7 +127,7 @@ export function Catalog() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-sm outline-none placeholder:text-black/40"
-            placeholder="Buscar guantillas, straps, leggings…"
+            placeholder="Buscar pulóver, shorts, seamless…"
           />
         </div>
 
@@ -142,17 +177,13 @@ export function Catalog() {
         </aside>
 
         <div>
-          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
             {filtered.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </section>
 
-          {filtered.length === 0 && (
-            <div className="mt-6 rounded-3xl border border-black/10 bg-black/[0.02] p-6 text-sm text-black/60">
-              No encontramos resultados. Probá con otros filtros.
-            </div>
-          )}
+          {filtered.length === 0 && <EmptyState onClear={clearFilters} />}
         </div>
       </section>
 
