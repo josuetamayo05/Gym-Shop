@@ -1,24 +1,36 @@
-import type { Product } from "../types";
+import type { Product } from "../entities/product/model/types";
 import { AccordionSection } from "./AccordionSection";
 
 type CategoryFilter = "Todos" | Product["category"];
+type TypeFilter = "Todos" | Product["productType"];
 
 export function FiltersContent({
   category,
   onCategoryChange,
+
+  productTypes,
+  productType,
+  onProductTypeChange,
+
   sizes,
   selectedSizes,
   onToggleSize,
+
   priceMin,
   priceMax,
   onPriceMinChange,
   onPriceMaxChange,
-  onClear,
   minBound,
   maxBound,
+
+  onClear,
 }: {
   category: CategoryFilter;
   onCategoryChange: (v: CategoryFilter) => void;
+
+  productTypes: Product["productType"][];
+  productType: TypeFilter;
+  onProductTypeChange: (v: TypeFilter) => void;
 
   sizes: string[];
   selectedSizes: string[];
@@ -28,13 +40,12 @@ export function FiltersContent({
   priceMax: number;
   onPriceMinChange: (v: number) => void;
   onPriceMaxChange: (v: number) => void;
-
   minBound: number;
   maxBound: number;
 
   onClear: () => void;
 }) {
-  const categories: CategoryFilter[] = ["Todos", "Accesorios", "Hombre", "Mujer"];
+  const categories: CategoryFilter[] = ["Todos", "Hombre", "Mujer", "Accesorios"];
 
   return (
     <div className="space-y-3">
@@ -57,6 +68,20 @@ export function FiltersContent({
               </button>
             );
           })}
+        </div>
+      </AccordionSection>
+
+      <AccordionSection title="Tipo de producto" defaultOpen>
+        <div className="flex flex-wrap gap-2">
+          <Chip active={productType === "Todos"} onClick={() => onProductTypeChange("Todos")}>
+            Todos
+          </Chip>
+
+          {productTypes.map((t) => (
+            <Chip key={t} active={productType === t} onClick={() => onProductTypeChange(t)}>
+              {t}
+            </Chip>
+          ))}
         </div>
       </AccordionSection>
 
@@ -85,9 +110,8 @@ export function FiltersContent({
             );
           })}
         </div>
-
         <p className="mt-3 text-xs text-black/50">
-          Si no elegís talla, se muestran todos.
+          Si no seleccionas talla, se muestran todas.
         </p>
       </AccordionSection>
 
@@ -104,7 +128,6 @@ export function FiltersContent({
               className="mt-1 w-full rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/30"
             />
           </div>
-
           <div>
             <p className="text-xs text-black/50">Máx</p>
             <input
@@ -117,7 +140,6 @@ export function FiltersContent({
             />
           </div>
         </div>
-
         <p className="mt-3 text-xs text-black/50">
           Rango: {minBound} – {maxBound}
         </p>
@@ -130,5 +152,29 @@ export function FiltersContent({
         Limpiar filtros
       </button>
     </div>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={
+        "rounded-2xl border px-4 py-2 text-sm font-semibold transition " +
+        (active
+          ? "border-black bg-black text-white"
+          : "border-black/10 bg-white hover:bg-black/5")
+      }
+    >
+      {children}
+    </button>
   );
 }

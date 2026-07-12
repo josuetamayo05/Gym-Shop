@@ -65,7 +65,7 @@ export function QuickViewDialog({
 
               <div>
                 <p className="text-xs uppercase tracking-widest text-black/50">
-                  {product.category}
+                  {product.category} · {product.productType}
                 </p>
                 <h2 className="mt-2 text-xl font-semibold">{product.name}</h2>
                 <p className="mt-2 text-base font-semibold">

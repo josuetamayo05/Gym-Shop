@@ -3,6 +3,8 @@ import { ShoppingBag, Search } from "lucide-react";
 import { useCartStore } from "../store/cartStore";
 import { useUIStore } from "../store/uiStore";
 
+import logo from "../../public/logo.jpg";
+
 export function Header() {
   const setCartOpen = useUIStore((s) => s.setCartOpen);
 
@@ -16,17 +18,19 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-black/10 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-xl bg-[#0B0B0C]" />
-          <span className="text-sm font-semibold tracking-wide">
-            GYM STUDIO
-          </span>
+          <img
+            src={logo}
+            alt="GYM STUDIO"
+            className="h-8 w-8 rounded-xl object-cover"
+          />
+          <span className="text-sm font-semibold tracking-wide">GYM STUDIO</span>
         </div>
 
         <div className="ml-auto hidden w-full max-w-md items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2 md:flex">
           <Search className="h-4 w-4 text-black/50" />
           <input
             className="w-full bg-transparent text-sm outline-none placeholder:text-black/40"
-            placeholder="Buscar guantillas, straps, leggings…"
+            placeholder="Buscar pulóveres, shorts…"
           />
         </div>
 

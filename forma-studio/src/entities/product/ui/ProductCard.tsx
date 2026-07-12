@@ -85,7 +85,9 @@ export function ProductCard({ product }: { product: Product }) {
               <h3 className="truncate text-sm font-semibold leading-tight">
                 {product.name}
               </h3>
-              <p className="mt-1 text-xs text-black/60">{product.category}</p>
+              <p className="mt-1 text-xs text-black/60">
+                {product.category} · {product.productType}
+              </p>
             </div>
             <p className="text-sm font-semibold">{formatMoney(product.price)}</p>
           </div>

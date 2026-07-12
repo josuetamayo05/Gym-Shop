@@ -3,13 +3,14 @@ import type { Product } from "./types";
 
 export const PRODUCTS: Product[] = [
   // -------------------------
-  // PULÓVERES (4)
+  // PULÓVERES
   // -------------------------
   {
     id: "pullover-001",
     slug: "pulover-fleece-hombre-negro",
     name: "Pulóver Fleece (Hombre) — Negro",
     category: "Hombre",
+    productType: "Pulover",
     price: 12,
     badge: "Best seller",
     featured: true,
@@ -27,9 +28,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "pullover-002",
-    slug: "pulover-tech-knit-unisex-beige",
-    name: "Pulóver Tech Knit (Unisex) — Beige",
+    slug: "pulover-tech-knit-beige",
+    name: "Pulóver Tech Knit — Beige",
     category: "Hombre",
+    productType: "Pulover",
     price: 12,
     badge: "Nuevo",
     images: [
@@ -45,11 +47,10 @@ export const PRODUCTS: Product[] = [
     id: "pullover-003",
     slug: "pulover-cropped-training-mujer-hueso",
     name: "Pulóver Cropped Training (Mujer) — Hueso",
-    category: "Hombre",
+    category: "Mujer",
+    productType: "Pulover",
     price: 12,
-    images: [
-      "/products/pullovers/photo_4_2026-07-11_16-01-25.jpg",
-    ],
+    images: ["/products/pullovers/photo_4_2026-07-11_16-01-25.jpg"],
     description:
       "Pulóver cropped con fit cómodo y moderno. Perfecto para calentar, ir al gym o estilo athleisure.",
     sizes: ["XS", "S", "M", "L"],
@@ -57,22 +58,22 @@ export const PRODUCTS: Product[] = [
   {
     id: "pullover-004",
     slug: "pulover-half-zip-performance-mujer-gris",
-    name: "Pulóver Half-Zip Performance ",
-    category: "Hombre",
+    name: "Pulóver Half-Zip Performance (Mujer) — Gris",
+    category: "Mujer",
+    productType: "Pulover",
     price: 12,
     featured: true,
-    images: [
-      "/products/pullovers/photo_5_2026-07-11_16-01-25.jpg",
-    ],
+    images: ["/products/pullovers/photo_5_2026-07-11_16-01-25.jpg"],
     description:
       "Half-zip con cuello alto y estética sport-tech. Ideal para entrenamiento ligero, running o capas.",
     sizes: ["XS", "S", "M", "L"],
   },
   {
     id: "pullover-006",
-    slug: "pulover-half-s",
+    slug: "pulover-half-zip-performance-hombre-gris",
     name: "Pulóver Half-Zip Performance (Hombre) — Gris",
     category: "Hombre",
+    productType: "Pulover",
     price: 12,
     featured: true,
     images: [
@@ -89,18 +90,19 @@ export const PRODUCTS: Product[] = [
   },
 
   // -------------------------
-  // SHORTS (4)
+  // SHORTS
   // -------------------------
   {
     id: "shorts-001",
     slug: "shorts-training-7-hombre-negro",
     name: "Shorts Training 7” (Hombre) — Negro",
     category: "Hombre",
+    productType: "Short",
     price: 15,
     badge: "-15%",
     images: [
       "/products/shorts/photo_13_2026-07-11_16-01-25.jpg",
-      "/products/photo_12_2026-07-11_16-01-25.jpg",
+      "/products/shorts/photo_12_2026-07-11_16-01-25.jpg",
     ],
     description:
       "Shorts livianos con secado rápido. Cintura elástica con ajuste y bolsillos laterales discretos.",
@@ -111,6 +113,7 @@ export const PRODUCTS: Product[] = [
     slug: "shorts-2en1-hombre-beige",
     name: "Shorts 2 en 1 (Hombre) — Beige",
     category: "Hombre",
+    productType: "Short",
     price: 15,
     featured: true,
     images: [
@@ -127,6 +130,7 @@ export const PRODUCTS: Product[] = [
     slug: "shorts-seamless-mujer-negro",
     name: "Shorts Seamless (Mujer) — Negro",
     category: "Mujer",
+    productType: "Short",
     price: 15,
     badge: "Best seller",
     images: [
@@ -144,6 +148,7 @@ export const PRODUCTS: Product[] = [
     slug: "shorts-biker-mujer-hueso",
     name: "Shorts Biker Compression (Mujer) — Hueso",
     category: "Mujer",
+    productType: "Short",
     price: 15,
     images: [
       "/products/shorts/photo_18_2026-07-11_16-01-25.jpg",
@@ -157,9 +162,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "shorts-005",
-    slug: "shorts-biker-mujer-hueso",
-    name: "Shorts Biker Compression (Mujer) — Hueso",
+    slug: "shorts-biker-mujer-hueso-set-2",
+    name: "Shorts Biker Compression (Mujer) — Hueso (Set 2)",
     category: "Mujer",
+    productType: "Short",
     price: 15,
     images: [
       "/products/shorts/photo_24_2026-07-11_16-01-25.jpg",
@@ -175,9 +181,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "shorts-006",
-    slug: "shorts-biker-mujer-hueso",
-    name: "Shorts Biker Compression (Mujer) — Hueso",
+    slug: "shorts-biker-mujer-hueso-set-3",
+    name: "Shorts Biker Compression (Mujer) — Hueso (Set 3)",
     category: "Mujer",
+    productType: "Short",
     price: 15,
     images: [
       "/products/shorts/photo_38_2026-07-11_16-01-25.jpg",
