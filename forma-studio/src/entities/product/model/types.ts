@@ -7,6 +7,8 @@ export type ProductType =
   | "Suplementos"
   | "Camiseta"
   | "Leggings"
+  | "Tops"
+  | "Licra"
   | "Otro";
 
 export type Product = {
