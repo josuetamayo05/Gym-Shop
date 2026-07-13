@@ -226,7 +226,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "licras-003",
     slug: "licra-mujer",
-    name: "Licras Gym Levanta Glúteo II",
+    name: "Licras Gym Levanta GlúteoII",
     category: "Mujer",
     productType: "Licra",
     price: 8,
