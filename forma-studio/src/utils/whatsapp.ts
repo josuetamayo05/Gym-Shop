@@ -25,7 +25,7 @@ export function buildWhatsAppMessage(items: CartItem[]) {
   return lines.join("\n");
 }
 
-export function buildWhatsAppLink(phone: string, message: string) {
+export function buildWhatsAppLink(message: string) {
   // const cleanPhone = phone.replace(/[^\d]/g, "");
   return `https://wa.me/5350121476?text=${encodeURIComponent(message)}`;
 }

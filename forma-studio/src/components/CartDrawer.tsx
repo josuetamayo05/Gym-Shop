@@ -34,7 +34,7 @@ export function CartDrawer() {
 
   function handleWhatsApp() {
     const msg = buildWhatsAppMessage(items);
-    const url = buildWhatsAppLink(PHONE, msg);
+    const url = buildWhatsAppLink(msg);
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
