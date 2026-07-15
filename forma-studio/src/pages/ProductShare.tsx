@@ -5,6 +5,7 @@ import { toBlob } from "html-to-image";
 import { getProductBySlug } from "../entities/product/model/selectors";
 import { formatMoney } from "../utils/money";
 import type { Product } from "../entities/product/model/types";
+import html2canvas from "html2canvas";
 
 const WHATSAPP = (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) ?? "";
 type Format = "post" | "story";
@@ -101,40 +102,43 @@ function ProductShareView({ product: p, format }: { product: Product; format: Fo
     setDownloading(true);
 
     try {
-      const blob = await toBlob(frameRef.current, {
-        cacheBust: true,
-        pixelRatio: 3,
-        backgroundColor: "#0B0B0C",
-      });
+        const canvas = await html2canvas(frameRef.current, {
+        backgroundColor: "#F7F3EE", // el fondo real de tu tarjeta
+        scale: 3,                  // calidad alta
+        useCORS: true,             // por si algún día usas imágenes externas
+        });
 
-      if (!blob) return;
+        const blob: Blob | null = await new Promise((resolve) =>
+        canvas.toBlob(resolve, "image/png")
+        );
+        if (!blob) return;
 
-      const file = new File([blob], `${p.slug}-${format}.png`, { type: "image/png" });
+        const file = new File([blob], `${p.slug}-${format}.png`, { type: "image/png" });
 
-      // iOS/Android modernos: abrir Share Sheet (Guardar imagen / WhatsApp / Archivos)
-      const nav = navigator as Navigator & {
-        share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void>;
+        // Share Sheet (iPhone/Android modernos)
+        const nav = navigator as Navigator & {
+        share?: (data: { files?: File[]; title?: string }) => Promise<void>;
         canShare?: (data: { files?: File[] }) => boolean;
-      };
+        };
 
-      if (typeof nav.share === "function" && typeof nav.canShare === "function") {
+        if (typeof nav.share === "function" && typeof nav.canShare === "function") {
         if (nav.canShare({ files: [file] })) {
-          await nav.share({ files: [file], title: "GYM STUDIO" });
-          return;
+            await nav.share({ files: [file], title: "GYM STUDIO" });
+            return;
         }
-      }
+        }
 
-      // Fallback: descarga normal (desktop)
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${p.slug}-${format}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
+        // Fallback: descarga normal (desktop)
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${p.slug}-${format}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
     } finally {
-      setDownloading(false);
+        setDownloading(false);
     }
-  }
+    }
 
   return (
     <main className="min-h-[calc(100vh-56px)] bg-[#0B0B0C] px-4 py-8">
