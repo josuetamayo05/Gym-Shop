@@ -1,10 +1,11 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { X, Minus, Plus, Trash2 } from "lucide-react";
+
 import { useUIStore } from "../store/uiStore";
 import { useCartStore } from "../store/cartStore";
 import { formatMoney } from "../utils/money";
-import { buildWhatsAppLink, buildWhatsAppMessage } from "../utils/whatsapp";
+import { buildWhatsAppLink, buildWhatsAppMessagePro, generateOrderId } from "../utils/whatsapp";
 
 const PHONE = (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) ?? "";
 
@@ -12,29 +13,25 @@ export function CartDrawer() {
   const cartOpen = useUIStore((s) => s.cartOpen);
   const setCartOpen = useUIStore((s) => s.setCartOpen);
 
-  // IMPORTANTE: traemos el objeto items (estable) desde el store
   const itemsMap = useCartStore((s) => s.items);
   const setQty = useCartStore((s) => s.setQty);
   const remove = useCartStore((s) => s.remove);
 
-  // Convertimos a array fuera del selector (evita loop infinito)
   const items = useMemo(() => Object.values(itemsMap), [itemsMap]);
-
-  const totalItems = useMemo(
-    () => items.reduce((acc, it) => acc + it.quantity, 0),
-    [items]
-  );
-
+  const totalItems = useMemo(() => items.reduce((a, it) => a + it.quantity, 0), [items]);
   const totalPrice = useMemo(
-    () => items.reduce((acc, it) => acc + it.product.price * it.quantity, 0),
+    () => items.reduce((a, it) => a + it.product.price * it.quantity, 0),
     [items]
   );
+
+  const [note, setNote] = useState("");
+  const [orderId] = useState(() => generateOrderId("GS"));
 
   const canSend = items.length > 0 && PHONE.length > 0;
 
   function handleWhatsApp() {
-    const msg = buildWhatsAppMessage(items);
-    const url = buildWhatsAppLink(msg);
+    const msg = buildWhatsAppMessagePro(items, { note, orderId });
+    const url = buildWhatsAppLink(PHONE, msg);
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
@@ -43,13 +40,11 @@ export function CartDrawer() {
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40" />
 
-        <Dialog.Content className="fixed right-0 top-0 z-50 h-full w-full max-w-md border-l border-black/10 bg-white outline-none">
+        <Dialog.Content className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col border-l border-black/10 bg-white outline-none">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-black/10 p-4">
             <div>
-              <Dialog.Title className="text-base font-semibold">
-                Tu carrito
-              </Dialog.Title>
+              <Dialog.Title className="text-base font-semibold">Carrito</Dialog.Title>
               <p className="text-xs text-black/60">{totalItems} artículo(s)</p>
             </div>
 
@@ -58,8 +53,8 @@ export function CartDrawer() {
             </Dialog.Close>
           </div>
 
-          {/* Items */}
-          <div className="h-[calc(100%-168px)] overflow-auto p-4">
+          {/* Body (scroll) */}
+          <div className="flex-1 overflow-auto p-4">
             {items.length === 0 ? (
               <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-sm text-black/60">
                 Tu carrito está vacío.
@@ -127,6 +122,22 @@ export function CartDrawer() {
                     </div>
                   </div>
                 ))}
+
+                {/* Nota opcional (simple, rápido) */}
+                <details className="rounded-2xl border border-black/10 bg-white p-3">
+                  <summary className="cursor-pointer list-none text-sm font-semibold">
+                    Añadir nota (opcional)
+                  </summary>
+                  <p className="mt-2 text-xs text-black/60">
+                    Puedes escribir tu nombre, zona/dirección o una indicación rápida.
+                  </p>
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Ej: Soy Carlos, entregar en Vedado / Lo recojo mañana…"
+                    className="mt-2 min-h-20 w-full resize-none rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/30"
+                  />
+                </details>
               </div>
             )}
           </div>
@@ -135,9 +146,7 @@ export function CartDrawer() {
           <div className="border-t border-black/10 bg-white p-4">
             <div className="flex items-center justify-between text-sm">
               <span className="text-black/60">Total</span>
-              <span className="text-base font-semibold">
-                {formatMoney(totalPrice)}
-              </span>
+              <span className="text-base font-semibold">{formatMoney(totalPrice)}</span>
             </div>
 
             <button
