@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Share2 } from "lucide-react";
+
 import type { Product } from "../../../types";
 import { formatMoney } from "../../../utils/money";
 import { useCartStore } from "../../../store/cartStore";
@@ -25,6 +27,11 @@ export function ProductCard({ product }: { product: Product }) {
     setQuickAddOpen(true);
   }
 
+  function openShare(format: "post" | "story" = "post") {
+    // abre la plantilla de compartir en otra pestaña
+    window.open(`/share/${product.slug}?format=${format}`, "_blank", "noopener,noreferrer");
+  }
+
   return (
     <>
       <article className="group overflow-hidden rounded-3xl border border-black/10 bg-white">
@@ -48,15 +55,31 @@ export function ProductCard({ product }: { product: Product }) {
               loading="lazy"
             />
 
+            {/* Botón Compartir (siempre visible, no molesta en móvil) */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openShare("post");
+              }}
+              className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/30 bg-white/20 text-white backdrop-blur hover:bg-white/30"
+              aria-label="Compartir"
+              title="Compartir"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
+
             {product.badge && (
               <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black backdrop-blur">
                 {product.badge}
               </div>
             )}
 
-            {/* OVERLAY SOLO DESKTOP (para evitar solapes en móvil) */}
+            {/* Overlay SOLO DESKTOP */}
             <div className="pointer-events-none absolute inset-x-3 bottom-3 hidden gap-2 opacity-0 transition md:flex md:group-hover:opacity-100">
               <button
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -68,6 +91,7 @@ export function ProductCard({ product }: { product: Product }) {
               </button>
 
               <button
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -89,15 +113,13 @@ export function ProductCard({ product }: { product: Product }) {
                 {product.name}
               </h3>
               <p className="mt-1 text-xs text-black/60">
-                {product.category}
-                {" · "}
-                {product.productType}
+                {product.category} · {product.productType}
               </p>
             </div>
             <p className="text-sm font-semibold">{formatMoney(product.price)}</p>
           </div>
 
-          {/* ACCIONES SOLO MÓVIL (siempre visibles y sin solaparse) */}
+          {/* ACCIONES SOLO MÓVIL */}
           <div className="flex gap-2 md:hidden">
             <button
               onClick={handleQuickAdd}
@@ -105,11 +127,21 @@ export function ProductCard({ product }: { product: Product }) {
             >
               Añadir
             </button>
+
             <button
               onClick={() => setQuickViewOpen(true)}
               className="flex-1 rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
             >
               Ver
+            </button>
+
+            <button
+              onClick={() => openShare("post")}
+              className="shrink-0 rounded-2xl border border-black/10 bg-white px-3 py-2 hover:bg-black/5"
+              aria-label="Compartir"
+              title="Compartir"
+            >
+              <Share2 className="h-4 w-4" />
             </button>
           </div>
 
