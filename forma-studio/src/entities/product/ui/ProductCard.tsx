@@ -28,8 +28,11 @@ export function ProductCard({ product }: { product: Product }) {
   }
 
   function openShare(format: "post" | "story" = "post") {
-    // abre la plantilla de compartir en otra pestaña
-    window.open(`/share/${product.slug}?format=${format}`, "_blank", "noopener,noreferrer");
+    window.open(
+      `${window.location.origin}/share/${product.slug}?format=${format}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   return (

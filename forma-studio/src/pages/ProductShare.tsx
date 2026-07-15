@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
-import { toPng } from "html-to-image";
+import { toBlob } from "html-to-image";
 
 import { getProductBySlug } from "../entities/product/model/selectors";
 import { formatMoney } from "../utils/money";
@@ -63,7 +63,12 @@ function ProductShareView({ product: p, format }: { product: Product; format: Fo
 
   const images = p.images?.length ? p.images : ["/products/placeholder.jpg"];
   const collage = images.slice(0, 4);
-  const sizes = p.sizes?.length ? p.sizes : ["Consultar"];
+
+  // Memo para que no cree arrays nuevos en cada render
+  const sizes = useMemo(() => {
+    return p.sizes?.length ? p.sizes : (["Consultar"] as string[]);
+  }, [p.sizes]);
+
   const priceText = formatMoney(p.price);
 
   const shareText = useMemo(() => {
@@ -76,7 +81,7 @@ function ProductShareView({ product: p, format }: { product: Product; format: Fo
       whatsapp: WHATSAPP,
       note: "Disponibilidad por WhatsApp. Respuesta rápida.",
     });
-  }, [p.name, p.category, p.productType, sizes, priceText]);
+  }, [p.name, p.category, p.productType, priceText, sizes]);
 
   const frameClass =
     format === "story" ? "w-[360px] aspect-[9/16]" : "w-[360px] aspect-[4/5]";
@@ -94,17 +99,38 @@ function ProductShareView({ product: p, format }: { product: Product; format: Fo
   async function handleDownload() {
     if (!frameRef.current) return;
     setDownloading(true);
+
     try {
-      const dataUrl = await toPng(frameRef.current, {
+      const blob = await toBlob(frameRef.current, {
         cacheBust: true,
         pixelRatio: 3,
         backgroundColor: "#0B0B0C",
       });
 
+      if (!blob) return;
+
+      const file = new File([blob], `${p.slug}-${format}.png`, { type: "image/png" });
+
+      // iOS/Android modernos: abrir Share Sheet (Guardar imagen / WhatsApp / Archivos)
+      const nav = navigator as Navigator & {
+        share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void>;
+        canShare?: (data: { files?: File[] }) => boolean;
+      };
+
+      if (typeof nav.share === "function" && typeof nav.canShare === "function") {
+        if (nav.canShare({ files: [file] })) {
+          await nav.share({ files: [file], title: "GYM STUDIO" });
+          return;
+        }
+      }
+
+      // Fallback: descarga normal (desktop)
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = dataUrl;
+      a.href = url;
       a.download = `${p.slug}-${format}.png`;
       a.click();
+      URL.revokeObjectURL(url);
     } finally {
       setDownloading(false);
     }
@@ -153,7 +179,7 @@ function ProductShareView({ product: p, format }: { product: Product; format: Fo
               disabled={downloading}
               className="rounded-full bg-[#D8C3A5] px-3 py-1 text-xs font-semibold text-black disabled:opacity-60"
             >
-              {downloading ? "Generando…" : "Descargar PNG"}
+              {downloading ? "Generando…" : "Guardar/Compartir PNG"}
             </button>
           </div>
         </div>
