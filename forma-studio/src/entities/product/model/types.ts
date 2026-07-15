@@ -1,15 +1,6 @@
 export type Category = "Hombre" | "Mujer" | "Accesorios";
 
-export type ProductType =
-  | "Pulover"
-  | "Short"
-  | "Accesorios"
-  | "Suplementos"
-  | "Camiseta"
-  | "Leggings"
-  | "Tops"
-  | "Licra"
-  | "Otro";
+export type ProductType = "Pulover" | "Short" | "Licra" | "Tops" | "Accesorios" | "Suplementos" | "Otro";
 
 export type Product = {
   id: string;

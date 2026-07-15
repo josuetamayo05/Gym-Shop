@@ -2,13 +2,13 @@
 import type { Product } from "./types";
 
 export const PRODUCTS: Product[] = [
-  // -------------------------
-  // PULÓVERES
-  // -------------------------
+  // =========================
+  // PULÓVERES (Hombre / Mujer)
+  // =========================
   {
     id: "pullover-001",
     slug: "pulover-verano-gym",
-    name: "Pulóver Verano-Gym C/U",
+    name: "Pulóver Training Ligero — Hombre",
     category: "Hombre",
     productType: "Pulover",
     price: 10,
@@ -23,13 +23,57 @@ export const PRODUCTS: Product[] = [
       "/products/pullovers/photo_5_2026-07-11_16-01-25.jpg",
     ],
     description:
-      "Pulóver fleece de tacto suave con fit oversize. Ideal para pre/pos entreno. Puños elásticos y cuello redondo.",
+      "Pulóver deportivo ligero, ideal para calentamiento y post-entreno. Tejido suave, fit cómodo y estilo minimal para gym o uso diario.",
     sizes: ["S", "M", "L", "XL"],
   },
   {
+    id: "pullover-003",
+    slug: "pulover-deportivo-mujer",
+    name: "Pulóver Deportivo — Mujer",
+    category: "Mujer",
+    productType: "Pulover",
+    price: 12,
+    images: [
+      "/products/blusas/photo_14_2026-07-13_15-01-27.jpg",
+      "/products/blusas/photo_15_2026-07-13_15-01-27.jpg",
+      "/products/blusas/photo_16_2026-07-13_15-01-27.jpg",
+      "/products/blusas/photo_17_2026-07-13_15-01-27.jpg",
+      "/products/blusas/photo_18_2026-07-13_15-01-27.jpg",
+      "/products/blusas/photo_19_2026-07-13_15-01-27.jpg",
+    ],
+    description:
+      "Pulóver/blusa deportiva para entrenar o salir. Ligero y cómodo, perfecto como capa sobre top. Ideal para días frescos y rutinas de gym.",
+    sizes: ["S"],
+  },
+  {
+    id: "pullover-006",
+    slug: "pulover-half-zip-performance-hombre-gris",
+    name: "Pulóver Half‑Zip Performance — Hombre (Gris)",
+    category: "Hombre",
+    productType: "Pulover",
+    price: 12,
+    featured: true,
+    images: [
+      "/products/pullovers/photo_31_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_25_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_26_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_27_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_28_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_29_2026-07-11_16-01-25.jpg",
+      "/products/pullovers/photo_30_2026-07-11_16-01-25.jpg",
+    ],
+    description:
+      "Pulóver half‑zip con cuello alto y look sport‑tech. Ideal para calentar, entrenar suave o usar en capas. Cómodo y fácil de combinar.",
+    sizes: ["S", "M"],
+  },
+
+  // =========================
+  // TOPS (Mujer)
+  // =========================
+  {
     id: "tops-001",
     slug: "tops-mujer",
-    name: "Tops Mujer GYM C/U",
+    name: "Top Deportivo Training — Mujer",
     category: "Mujer",
     productType: "Tops",
     price: 9,
@@ -46,32 +90,17 @@ export const PRODUCTS: Product[] = [
       "/products/tops/photo_28_2026-07-13_15-01-28.jpg",
     ],
     description:
-      "Tejido técnico con caída premium y look minimal. Liviano, cómodo y fácil de combinar con shorts o joggers.",
+      "Top deportivo cómodo y elástico para entrenar. Diseñado para movilidad y soporte en gym. Perfecto para combinar con licras o shorts.",
     sizes: ["S"],
   },
-  {
-    id: "pullover-003",
-    slug: "pulover-deportivo-mujer",
-    name: "Pulóver Deportivo Mujer",
-    category: "Mujer",
-    productType: "Pulover",
-    price: 12,
-    images: [
-      "/products/blusas/photo_14_2026-07-13_15-01-27.jpg",
-      "/products/blusas/photo_15_2026-07-13_15-01-27.jpg",
-      "/products/blusas/photo_16_2026-07-13_15-01-27.jpg",
-      "/products/blusas/photo_17_2026-07-13_15-01-27.jpg",
-      "/products/blusas/photo_18_2026-07-13_15-01-27.jpg",
-      "/products/blusas/photo_19_2026-07-13_15-01-27.jpg",
-    ],
-    description:
-      "Pulóver cropped con fit cómodo y moderno. Perfecto para calentar, ir al gym o estilo athleisure.",
-    sizes: ["S"],
-  },
+
+  // =========================
+  // LICRAS (Mujer)
+  // =========================
   {
     id: "licras-001",
-    slug: "licra-mujer",
-    name: "Licras Levanta Glúteo",
+    slug: "licras-levanta-gluteo-1",
+    name: "Licra Levanta Glúteo — Mujer (Modelo 1)",
     category: "Mujer",
     productType: "Licra",
     price: 12,
@@ -85,38 +114,53 @@ export const PRODUCTS: Product[] = [
       "/products/licras/photo_34_2026-07-13_15-01-28.jpg",
     ],
     description:
-      "Half-zip con cuello alto y estética sport-tech. Ideal para entrenamiento ligero, running o capas.",
+      "Licra de entrenamiento con ajuste firme y cintura alta. Pensada para acompañar el movimiento y ofrecer un fit favorecedor. Ideal para pierna/glúteo y uso diario.",
     sizes: ["S"],
   },
   {
-    id: "pullover-006",
-    slug: "pulover-half-zip-performance-hombre-gris",
-    name: "Pulóver Half-Zip Performance (Hombre) — Gris",
-    category: "Hombre",
-    productType: "Pulover",
-    price: 12,
+    id: "licras-002",
+    slug: "licras-levanta-gluteo-2",
+    name: "Licra Levanta Glúteo — Mujer (Modelo 2)",
+    category: "Mujer",
+    productType: "Licra",
+    price: 7,
     featured: true,
     images: [
-      "/products/pullovers/photo_31_2026-07-11_16-01-25.jpg",
-      "/products/pullovers/photo_25_2026-07-11_16-01-25.jpg",
-      "/products/pullovers/photo_26_2026-07-11_16-01-25.jpg",
-      "/products/pullovers/photo_27_2026-07-11_16-01-25.jpg",
-      "/products/pullovers/photo_28_2026-07-11_16-01-25.jpg",
-      "/products/pullovers/photo_29_2026-07-11_16-01-25.jpg",
-      "/products/pullovers/photo_30_2026-07-11_16-01-25.jpg",
+      "/products/licras/photo_35_2026-07-13_15-01-28.jpg",
+      "/products/licras/photo_36_2026-07-13_15-01-28.jpg",
+      "/products/licras/photo_37_2026-07-13_15-01-28.jpg",
+      "/products/licras/photo_38_2026-07-13_15-01-28.jpg",
     ],
     description:
-      "Half-zip con cuello alto y estética sport-tech. Ideal para entrenamiento ligero, running o capas.",
-    sizes: ["S", "M"],
+      "Licra para gym con buena elasticidad y fit cómodo. Cintura alta para mayor sujeción y confianza durante la rutina. Ideal para combinar con tops.",
+    sizes: ["M"],
+  },
+  {
+    id: "licras-003",
+    slug: "licras-levanta-gluteo-3",
+    name: "Licra Levanta Glúteo — Mujer (Modelo 3)",
+    category: "Mujer",
+    productType: "Licra",
+    price: 8,
+    featured: true,
+    images: [
+      "/products/licras/photo_1_2026-07-13_15-47-18.jpg",
+      "/products/licras/photo_2_2026-07-13_15-47-18.jpg",
+      "/products/licras/photo_3_2026-07-13_15-47-18.jpg",
+      "/products/licras/photo_4_2026-07-13_15-47-18.jpg",
+    ],
+    description:
+      "Licra deportiva de ajuste favorecedor, ideal para fuerza y cardio. Diseñada para moverte libre y sentir soporte durante todo el entrenamiento.",
+    sizes: ["S"],
   },
 
-  // -------------------------
-  // SHORTS
-  // -------------------------
+  // =========================
+  // SHORTS (Hombre)
+  // =========================
   {
     id: "shorts-001",
     slug: "shorts-training-7-hombre-negro",
-    name: "Shorts Training 7” (Hombre) — Negro",
+    name: "Short Training 7” — Hombre (Negro)",
     category: "Hombre",
     productType: "Short",
     price: 12,
@@ -129,13 +173,13 @@ export const PRODUCTS: Product[] = [
       "/products/shorts/new/photo_5_2026-07-13_15-01-27.jpg",
     ],
     description:
-      "Shorts livianos con secado rápido. Cintura elástica con ajuste y bolsillos laterales discretos.",
+      "Short de entrenamiento ligero y cómodo. Ideal para gym y uso diario. Cintura elástica con ajuste para moverte sin restricciones.",
     sizes: ["L"],
   },
   {
     id: "shorts-004",
-    slug: "shorts-biker-mujer-hueso",
-    name: "Shorts Biker Compression (Hombre)",
+    slug: "shorts-biker-compression-hombre-1",
+    name: "Short Biker Compression — Hombre (Modelo 1)",
     category: "Hombre",
     productType: "Short",
     price: 18,
@@ -146,13 +190,13 @@ export const PRODUCTS: Product[] = [
       "/products/shorts/photo_14_2026-07-11_16-01-25.jpg",
     ],
     description:
-      "Biker con compresión moderada y sensación suave. Perfecto para gym, yoga y looks minimal.",
+      "Short tipo biker con ajuste ceñido y sensación de soporte. Perfecto para rutinas intensas, funcional y cardio. Cómodo y estable al movimiento.",
     sizes: ["M"],
   },
   {
     id: "shorts-005",
-    slug: "shorts-biker-mujer-hueso-set-2",
-    name: "Shorts Biker Compression (Hombre) — Hueso (Set 2)",
+    slug: "shorts-biker-compression-hombre-2",
+    name: "Short Biker Compression — Hombre (Modelo 2)",
     category: "Hombre",
     productType: "Short",
     price: 18,
@@ -165,13 +209,13 @@ export const PRODUCTS: Product[] = [
       "/products/shorts/photo_19_2026-07-11_16-01-25.jpg",
     ],
     description:
-      "Biker con compresión moderada y sensación suave. Perfecto para gym, yoga y looks minimal.",
+      "Short biker de estilo minimal con fit cómodo. Diseñado para gym: se adapta al cuerpo y acompaña el movimiento. Ideal para combinar con pulóver o camiseta.",
     sizes: ["L"],
   },
   {
     id: "shorts-006",
-    slug: "shorts-biker-mujer-hueso-set-3",
-    name: "Shorts Biker Compression (Hombre) — Hueso (Set 3)",
+    slug: "shorts-biker-compression-hombre-3",
+    name: "Short Biker Compression — Hombre (Modelo 3)",
     category: "Hombre",
     productType: "Short",
     price: 13,
@@ -182,13 +226,13 @@ export const PRODUCTS: Product[] = [
       "/products/shorts/photo_14_2026-07-11_16-01-25.jpg",
     ],
     description:
-      "Biker con compresión moderada y sensación suave. Perfecto para gym, yoga y looks minimal.",
+      "Short biker con fit firme y cómodo. Buena movilidad y sensación de soporte para entrenamientos de gym o uso diario.",
     sizes: ["XS", "S", "M"],
   },
   {
     id: "shorts-007",
-    slug: "shorts-biker-mujer-hueso-set-4",
-    name: "Shorts Biker Compression (Hombre) — Hueso (Set 4)",
+    slug: "shorts-biker-compression-hombre-4",
+    name: "Short Biker Compression — Hombre (Modelo 4)",
     category: "Hombre",
     productType: "Short",
     price: 14,
@@ -202,43 +246,7 @@ export const PRODUCTS: Product[] = [
       "/products/shorts/new/photo_13_2026-07-13_15-01-27.jpg",
     ],
     description:
-      "Biker con compresión moderada y sensación suave. Perfecto para gym, yoga y looks minimal.",
+      "Short biker para entrenamiento con estilo limpio. Ajuste cómodo y soporte durante la rutina. Ideal para combinar con pulóver o top.",
     sizes: ["M"],
-  },
-  {
-    id: "licras-002",
-    slug: "licra-mujer",
-    name: "Licras Gym Levanta Glúteo",
-    category: "Mujer",
-    productType: "Licra",
-    price: 7,
-    featured: true,
-    images: [
-      "/products/licras/photo_35_2026-07-13_15-01-28.jpg",
-      "/products/licras/photo_36_2026-07-13_15-01-28.jpg",
-      "/products/licras/photo_37_2026-07-13_15-01-28.jpg",
-      "/products/licras/photo_38_2026-07-13_15-01-28.jpg",
-    ],
-    description:
-      "Half-zip con cuello alto y estética sport-tech. Ideal para entrenamiento ligero, running o capas.",
-    sizes: ["M"],
-  },
-  {
-    id: "licras-003",
-    slug: "licra-mujer",
-    name: "Licras Gym Levanta GlúteoII",
-    category: "Mujer",
-    productType: "Licra",
-    price: 8,
-    featured: true,
-    images: [
-      "/products/licras/photo_1_2026-07-13_15-47-18.jpg",
-      "/products/licras/photo_2_2026-07-13_15-47-18.jpg",
-      "/products/licras/photo_3_2026-07-13_15-47-18.jpg",
-      "/products/licras/photo_4_2026-07-13_15-47-18.jpg",
-    ],
-    description:
-      "Half-zip con cuello alto y estética sport-tech. Ideal para entrenamiento ligero, running o capas.",
-    sizes: ["S"],
   },
 ];

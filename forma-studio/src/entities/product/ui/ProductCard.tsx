@@ -16,8 +16,9 @@ export function ProductCard({ product }: { product: Product }) {
   const setCartOpen = useUIStore((s) => s.setCartOpen);
 
   function handleQuickAdd() {
-    if (product.sizes.length === 1) {
-      add(product, product.sizes[0]);
+    if ((product.sizes?.length ?? 0) <= 1) {
+      const size = product.sizes?.[0] ?? "Único";
+      add(product, size);
       setCartOpen(true);
       return;
     }
@@ -27,6 +28,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <>
       <article className="group overflow-hidden rounded-3xl border border-black/10 bg-white">
+        {/* Imagen (abre QuickView) */}
         <button
           type="button"
           onClick={() => setQuickViewOpen(true)}
@@ -39,10 +41,10 @@ export function ProductCard({ product }: { product: Product }) {
             )}
 
             <img
-              src={product.images[0]}
+              src={product.images?.[0]}
               alt={product.name}
               onLoad={() => setImgLoaded(true)}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              className="h-full w-full object-cover transition-transform duration-300 md:group-hover:scale-[1.03]"
               loading="lazy"
             />
 
@@ -52,8 +54,8 @@ export function ProductCard({ product }: { product: Product }) {
               </div>
             )}
 
-            {/* CTA overlay (desktop hover) */}
-            <div className="pointer-events-none absolute inset-x-3 bottom-3 flex gap-2 opacity-0 transition group-hover:opacity-100">
+            {/* OVERLAY SOLO DESKTOP (para evitar solapes en móvil) */}
+            <div className="pointer-events-none absolute inset-x-3 bottom-3 hidden gap-2 opacity-0 transition md:flex md:group-hover:opacity-100">
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -79,6 +81,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </button>
 
+        {/* Info + acciones */}
         <div className="space-y-2 p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -86,28 +89,31 @@ export function ProductCard({ product }: { product: Product }) {
                 {product.name}
               </h3>
               <p className="mt-1 text-xs text-black/60">
-                {product.category} · {product.productType}
+                {product.category}
+                {" · "}
+                {product.productType}
               </p>
             </div>
             <p className="text-sm font-semibold">{formatMoney(product.price)}</p>
           </div>
 
-          {/* Acciones mobile */}
-          <div className="grid grid-cols-2 gap-2 md:hidden">
+          {/* ACCIONES SOLO MÓVIL (siempre visibles y sin solaparse) */}
+          <div className="flex gap-2 md:hidden">
             <button
               onClick={handleQuickAdd}
-              className="rounded-2xl bg-[#0B0B0C] px-4 py-2 text-sm font-semibold text-white hover:bg-black/90"
+              className="flex-1 rounded-2xl bg-[#0B0B0C] px-4 py-2 text-sm font-semibold text-white hover:bg-black/90"
             >
               Añadir
             </button>
             <button
               onClick={() => setQuickViewOpen(true)}
-              className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
+              className="flex-1 rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
             >
               Ver
             </button>
           </div>
 
+          {/* Link visible en desktop */}
           <Link
             to={`/producto/${product.slug}`}
             className="hidden w-full rounded-2xl border border-black/10 bg-white px-4 py-2 text-center text-sm font-semibold hover:bg-black/5 md:block"
