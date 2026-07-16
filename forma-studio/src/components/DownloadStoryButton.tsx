@@ -42,7 +42,7 @@ export function DownloadStoryButton({ product }: { product: Product }) {
       );
       if (!blob) return;
 
-      const file = new File([blob], `${product.slug}-story.png`, { type: "image/png" });
+      const file = new File([blob], `${product.slug}-plantilla.png`, { type: "image/png" });
 
       // iPhone/Android: abrir Share Sheet (Guardar imagen / Archivos / WhatsApp)
       const nav = navigator as Navigator & {
@@ -86,7 +86,7 @@ export function DownloadStoryButton({ product }: { product: Product }) {
       {/* Render fuera de pantalla (NO opacity-0 para evitar PNG negro en iOS) */}
       <div className="fixed left-[-10000px] top-0">
         <div ref={frameRef}>
-          <ShareFrame product={product} format="story" whatsapp={WHATSAPP} />
+          <ShareFrame product={product} format="photo" whatsapp={WHATSAPP} />
         </div>
       </div>
     </>

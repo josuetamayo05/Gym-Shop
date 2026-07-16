@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import type { Product } from "../entities/product/model/types";
 import { formatMoney } from "../utils/money";
 
-type Format = "story" | "post" | "shein";
+type Format = "story" | "post" | "shein" | "photo";
 
 function absUrl(path: string) {
   return new URL(path, window.location.origin).toString();
@@ -23,48 +23,47 @@ export const ShareFrame = forwardRef<
 
   const priceText = formatMoney(p.price);
 
+  // La plantilla "photo" será 4:5, igual al catálogo
   const frameClass =
-    format === "story"
-      ? "w-[360px] aspect-[9/16]" // 1080x1920 al exportar con scale:3
-      : format === "post"
-        ? "w-[360px] aspect-[4/5]"
-        : "w-[360px] aspect-[3/4]";
+    format === "photo"
+      ? "w-[360px] aspect-[4/5]"   // 1080x1350 al exportar con scale:3
+      : format === "story"
+        ? "w-[360px] aspect-[9/16]"
+        : format === "post"
+          ? "w-[360px] aspect-[4/5]"
+          : "w-[360px] aspect-[3/4]";
 
-  // STORY: miniaturas fijas
+  // Miniaturas fijas para que jamás se solapen
   const THUMBS_COUNT = 4;
   const thumbs = images.slice(0, THUMBS_COUNT);
   const more = Math.max(0, images.length - thumbs.length);
 
-  // Algoritmo anti-corte:
-  // - Si el nombre es largo, baja font.
-  // - Si es MUY largo, quita descripción (para asegurar nombre+precio).
+  // Anti-corte: si el nombre es largo, reduce tamaño; si es muy largo, oculta descripción
   const nameLen = p.name.length;
   const nameClass =
     nameLen > 58 ? "text-sm" : nameLen > 42 ? "text-base" : "text-lg";
   const showDesc = Boolean(p.description) && nameLen <= 58;
-
-  // Story: descripción corta (si se muestra)
   const descText = clampText(p.description ?? "", 78);
 
-  if (format === "story") {
+  // PLANTILLA PHOTO (4:5) — TODO dentro de la imagen, sin “alargar” a story
+  if (format === "photo") {
     return (
       <div
         ref={ref}
         className={`${frameClass} relative overflow-hidden rounded-[28px] bg-black`}
       >
-        {/* Imagen full */}
+        {/* Foto ocupa TODO el frame */}
         <img
           src={absUrl(main)}
           alt={p.name}
           className="absolute inset-0 h-full w-full object-cover"
         />
 
-        {/* Degradado inferior para que siempre se lean letras */}
-        <div className="absolute inset-x-0 bottom-0 h-[44%] bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+        {/* Degradado inferior para legibilidad */}
+        <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
-        {/* Contenido inferior */}
+        {/* Contenido inferior (texto + precio + miniaturas) */}
         <div className="absolute inset-x-0 bottom-0 p-4">
-          {/* Texto + precio */}
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-white/70">
@@ -72,11 +71,8 @@ export const ShareFrame = forwardRef<
               </p>
 
               <h1
-                className={`mt-1 leading-snug font-semibold text-white ${nameClass}`}
-                style={{
-                  // evita que una palabra larguísima rompa el layout
-                  wordBreak: "break-word",
-                }}
+                className={`mt-1 font-semibold leading-snug text-white ${nameClass}`}
+                style={{ wordBreak: "break-word" }}
               >
                 {p.name}
               </h1>
@@ -92,7 +88,7 @@ export const ShareFrame = forwardRef<
             </div>
           </div>
 
-          {/* Miniaturas (fijas, sin solape) */}
+          {/* Miniaturas */}
           <div className="mt-3 flex gap-2">
             {thumbs.map((src, i) => {
               const isLast = i === thumbs.length - 1;
@@ -123,7 +119,7 @@ export const ShareFrame = forwardRef<
     );
   }
 
-  // POST / SHEIN: simple (si luego quieres lo ajustamos)
+  // Si no lo estás usando ahora, dejamos el resto simple (no afecta)
   return (
     <div
       ref={ref}
