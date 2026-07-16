@@ -42,13 +42,6 @@ async function captureNodePng(node: HTMLElement) {
   return blob;
 }
 
-const [copiedWhich, setCopiedWhich] = useState<"batch" | "all" | null>(null);
-
-function markCopied(which: "batch" | "all") {
-  setCopiedWhich(which);
-  window.setTimeout(() => setCopiedWhich(null), 1200);
-}
-
 function buildPublishText(products: Product[]) {
   const preset = "Hola! Vengo de Facebook. Me interesa un producto del catálogo. Producto: ";
   const waLink = WHATSAPP ? buildWhatsAppLink(WHATSAPP, preset) : "";
@@ -74,6 +67,13 @@ function buildPublishText(products: Product[]) {
 export function MobileExportTemplates() {
   const [batchSize, setBatchSize] = useState(10);
   const [batchIndex, setBatchIndex] = useState(0);
+
+  const [copiedWhich, setCopiedWhich] = useState<"batch" | "all" | null>(null);
+
+    function markCopied(which: "batch" | "all") {
+        setCopiedWhich(which);
+        window.setTimeout(() => setCopiedWhich(null), 1200);
+    }
 
   // “Modo asistido”: cuando compartes un lote, prepara el siguiente automáticamente
   const [autoMode, setAutoMode] = useState(false);
