@@ -9,6 +9,7 @@ import { ProductShare } from "./pages/ProductShare";
 import { ExportAssets } from "./pages/ExportAssets";
 import { MobileTools } from "./pages/MobileTools";
 import { MobileCollages } from "./pages/MobileCollages";
+import { MobileExportTemplates } from "./pages/MobileExportTemplates";
 
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/export" element={<ExportAssets />} />
         <Route path="/mobile" element={<MobileTools />} />
         <Route path="/mobile-collages" element={<MobileCollages />} />
+        <Route path="/mobile-export" element={<MobileExportTemplates />} />
       </Routes>
 
       <CartDrawer />
