@@ -5,8 +5,10 @@ import { PRODUCTS } from "../entities/product/model/products";
 import type { Product } from "../entities/product/model/types";
 import { formatMoney } from "../utils/money";
 import { ShareFrame } from "../components/ShareFrame";
+import { buildWhatsAppLink } from "../utils/whatsapp";
 
-const WHATSAPP = (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) ?? "";
+
+const PHONE = (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) ?? "";
 
 function waitNextPaint() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -24,6 +26,7 @@ async function waitForImages(container: HTMLElement) {
     })
   );
 }
+  
 
 async function captureNodePng(node: HTMLElement) {
   await waitForImages(node);
@@ -43,17 +46,24 @@ async function captureNodePng(node: HTMLElement) {
 
 function buildPublishText(products: Product[]) {
   const lines: string[] = [];
-  lines.push("GYM STUDIO");
-  lines.push(`WhatsApp: +${WHATSAPP}`);
-  lines.push("");
-  lines.push("Productos:");
 
+  const preset = "Hola! Vengo de Facebook. Me interesa un producto del catálogo. Producto: ";
+  const waLink = PHONE ? buildWhatsAppLink(PHONE, preset) : "";
+
+  lines.push("GYM STUDIO");
+  lines.push("");
+
+  // Lista simple de productos
   for (const p of products) {
     lines.push(`• ${p.name} — ${formatMoney(p.price)}`);
   }
 
   lines.push("");
-  lines.push("Disponibilidad por WhatsApp. Respuesta rápida.");
+  lines.push("Para pedir:");
+  lines.push(waLink ? waLink : "WhatsApp no configurado");
+  lines.push("");
+  lines.push("Escribe el nombre del producto y tu talla.");
+
   return lines.join("\n");
 }
 
@@ -264,7 +274,7 @@ export function MobileExportTemplates() {
       <div className="fixed left-[-10000px] top-0">
         <div ref={frameRef}>
           {currentRenderProduct && (
-            <ShareFrame product={currentRenderProduct} format="photo" whatsapp={WHATSAPP} />
+            <ShareFrame product={currentRenderProduct} format="photo" whatsapp={PHONE} />
           )}
         </div>
       </div>
