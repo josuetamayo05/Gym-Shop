@@ -7,8 +7,7 @@ import { formatMoney } from "../utils/money";
 import { ShareFrame } from "../components/ShareFrame";
 import { buildWhatsAppLink } from "../utils/whatsapp";
 
-
-const PHONE = "5350121476";
+const WHATSAPP = "5350121476";
 
 function waitNextPaint() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -26,14 +25,13 @@ async function waitForImages(container: HTMLElement) {
     })
   );
 }
-  
 
 async function captureNodePng(node: HTMLElement) {
   await waitForImages(node);
 
   const canvas = await html2canvas(node, {
     backgroundColor: "#000000",
-    scale: 3, // 360px -> 1080px final
+    scale: 3, // 360px => 1080px
     useCORS: true,
   });
 
@@ -44,23 +42,29 @@ async function captureNodePng(node: HTMLElement) {
   return blob;
 }
 
+const [copiedWhich, setCopiedWhich] = useState<"batch" | "all" | null>(null);
+
+function markCopied(which: "batch" | "all") {
+  setCopiedWhich(which);
+  window.setTimeout(() => setCopiedWhich(null), 1200);
+}
+
 function buildPublishText(products: Product[]) {
-  const lines: string[] = [];
-
   const preset = "Hola! Vengo de Facebook. Me interesa un producto del catálogo. Producto: ";
-  const waLink = PHONE ? buildWhatsAppLink(PHONE, preset) : "";
+  const waLink = WHATSAPP ? buildWhatsAppLink(WHATSAPP, preset) : "";
 
+  const lines: string[] = [];
   lines.push("GYM STUDIO");
   lines.push("");
+  lines.push("Productos:");
 
-  // Lista simple de productos
   for (const p of products) {
     lines.push(`• ${p.name} — ${formatMoney(p.price)}`);
   }
 
   lines.push("");
-  lines.push("Para pedir:");
-  lines.push(waLink ? waLink : "WhatsApp no configurado");
+  lines.push("Pedir por WhatsApp:");
+  lines.push(waLink || "WhatsApp no configurado");
   lines.push("");
   lines.push("Escribe el nombre del producto y tu talla.");
 
@@ -71,7 +75,10 @@ export function MobileExportTemplates() {
   const [batchSize, setBatchSize] = useState(10);
   const [batchIndex, setBatchIndex] = useState(0);
 
-  // Renderizamos 1 producto offscreen y lo capturamos; repetimos por cada producto del lote
+  // “Modo asistido”: cuando compartes un lote, prepara el siguiente automáticamente
+  const [autoMode, setAutoMode] = useState(false);
+
+  // Renderizamos 1 producto offscreen y lo capturamos; repetimos para el lote
   const [renderIndex, setRenderIndex] = useState(0);
   const currentRenderProduct = useMemo(() => PRODUCTS[renderIndex], [renderIndex]);
 
@@ -91,7 +98,7 @@ export function MobileExportTemplates() {
     return PRODUCTS.slice(start, start + batchSize);
   }, [batchIndex, batchSize]);
 
-  async function generateBatch() {
+  async function generateCurrentBatch() {
     setError("");
     setFiles([]);
     setPreparing(true);
@@ -103,7 +110,7 @@ export function MobileExportTemplates() {
         const idx = PRODUCTS.findIndex((x) => x.id === p.id);
         setRenderIndex(idx);
 
-        // Espera render estable
+        // Espera render
         await waitNextPaint();
         await waitNextPaint();
 
@@ -112,7 +119,6 @@ export function MobileExportTemplates() {
         const blob = await captureNodePng(frameRef.current);
         if (!blob) continue;
 
-        // 1 archivo por producto
         out.push(new File([blob], `${p.slug}-plantilla.png`, { type: "image/png" }));
       }
 
@@ -124,7 +130,7 @@ export function MobileExportTemplates() {
     }
   }
 
-  async function shareBatch() {
+  async function shareBatchAndMaybeNext() {
     setError("");
 
     const nav = navigator as Navigator & {
@@ -153,35 +159,55 @@ export function MobileExportTemplates() {
         title: "GYM STUDIO - Plantillas",
         text: `Lote ${batchIndex + 1}/${totalBatches}`,
       });
-      // En iPhone: elige “Guardar imágenes”
+
+      // Si está activo el modo automático: prepara el siguiente lote
+      if (autoMode && batchIndex < totalBatches - 1) {
+        setBatchIndex((x) => x + 1);
+        // limpia los files para obligar a regenerar
+        setFiles([]);
+        // espera a que cambie batchProducts
+        await waitNextPaint();
+        await generateCurrentBatch();
+      }
     } catch {
-      // usuario canceló
+      // usuario canceló, no hacemos nada
     }
   }
 
   async function copyBatchText() {
     const text = buildPublishText(batchProducts);
     try {
-      await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(text);
+        markCopied("batch");
     } catch {
-      prompt("Copia este texto:", text);
+        prompt("Copia este texto:", text);
     }
-  }
+    }
 
-  async function copyAllText() {
+    async function copyAllText() {
     const text = buildPublishText(PRODUCTS);
     try {
-      await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(text);
+        markCopied("all");
     } catch {
-      prompt("Copia este texto:", text);
+        prompt("Copia este texto:", text);
     }
+    }
+
+  async function startAutoExport() {
+    setAutoMode(true);
+    setBatchIndex(0);
+    setFiles([]);
+    await waitNextPaint();
+    await generateCurrentBatch();
   }
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6">
       <h1 className="text-xl font-semibold">Exportar plantillas (iPhone)</h1>
       <p className="mt-2 text-sm text-black/60">
-        Genera <b>1 plantilla por producto</b> (con tu diseño 4:5) y guarda varias a la vez.
+        Genera <b>1 plantilla por producto</b> (formato 4:5) y guarda varias a la vez con
+        iOS (Share Sheet → <b>Guardar imágenes</b>).
       </p>
 
       <section className="mt-5 space-y-3 rounded-3xl border border-black/10 bg-white p-4">
@@ -194,6 +220,7 @@ export function MobileExportTemplates() {
                 setBatchSize(Number(e.target.value));
                 setBatchIndex(0);
                 setFiles([]);
+                setAutoMode(false);
               }}
               className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
             >
@@ -209,6 +236,7 @@ export function MobileExportTemplates() {
               onClick={() => {
                 setBatchIndex((x) => Math.max(0, x - 1));
                 setFiles([]);
+                setAutoMode(false);
               }}
               className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold"
             >
@@ -223,6 +251,7 @@ export function MobileExportTemplates() {
               onClick={() => {
                 setBatchIndex((x) => Math.min(totalBatches - 1, x + 1));
                 setFiles([]);
+                setAutoMode(false);
               }}
               className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold"
             >
@@ -233,40 +262,53 @@ export function MobileExportTemplates() {
 
         <div className="flex flex-wrap gap-2">
           <button
-            onClick={generateBatch}
+            onClick={generateCurrentBatch}
             disabled={preparing}
             className="rounded-2xl bg-[#D8C3A5] px-4 py-2 text-sm font-semibold text-black disabled:opacity-60"
           >
-            {preparing ? "Generando…" : "Generar plantillas"}
+            {preparing ? "Generando…" : "Generar lote"}
           </button>
 
           <button
-            onClick={shareBatch}
+            onClick={shareBatchAndMaybeNext}
             disabled={!files.length}
             className="rounded-2xl bg-black px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
           >
-            Guardar/Compartir ({files.length})
+            {autoMode ? `Guardar/Compartir y siguiente (${files.length})` : `Guardar/Compartir (${files.length})`}
           </button>
 
           <button
             onClick={copyBatchText}
             className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
-          >
-            Copiar texto (este lote)
-          </button>
+            >
+            {copiedWhich === "batch" ? "Copiado" : "Copiar texto (este lote)"}
+            </button>
 
-          <button
+            <button
             onClick={copyAllText}
             className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
+            >
+            {copiedWhich === "all" ? "Copiado" : "Copiar texto (todo)"}
+            </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 pt-2">
+          <button
+            onClick={startAutoExport}
+            className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
           >
-            Copiar texto (todo)
+            Iniciar exportación completa (modo automático)
           </button>
+
+          <span className="text-xs text-black/50">
+            Luego solo toca “Guardar/Compartir y siguiente”.
+          </span>
         </div>
 
         {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
 
         <p className="text-xs text-black/50">
-          En iPhone: al tocar “Guardar/Compartir”, elige <b>Guardar imágenes</b>. Si da error, baja el lote a 5–10.
+          iPhone: al tocar “Guardar/Compartir”, elige <b>Guardar imágenes</b>. Si falla, baja el lote a 5–10.
         </p>
       </section>
 
@@ -274,7 +316,7 @@ export function MobileExportTemplates() {
       <div className="fixed left-[-10000px] top-0">
         <div ref={frameRef}>
           {currentRenderProduct && (
-            <ShareFrame product={currentRenderProduct} format="photo" whatsapp={PHONE} />
+            <ShareFrame product={currentRenderProduct} format="photo" whatsapp={WHATSAPP} />
           )}
         </div>
       </div>
