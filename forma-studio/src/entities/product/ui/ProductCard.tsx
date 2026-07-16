@@ -58,21 +58,6 @@ export function ProductCard({ product }: { product: Product }) {
               loading="lazy"
             />
 
-            {/* Botón Compartir (siempre visible, no molesta en móvil) */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openShare("post");
-              }}
-              className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/30 bg-white/20 text-white backdrop-blur hover:bg-white/30"
-              aria-label="Compartir"
-              title="Compartir"
-            >
-              <Share2 className="h-4 w-4" />
-            </button>
-
             {product.badge && (
               <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black backdrop-blur">
                 {product.badge}

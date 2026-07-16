@@ -2,6 +2,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { DownloadStoryButton } from "../components/DownloadStoryButton";
 
 import type { Product } from "../types";
 import { formatMoney } from "../utils/money";
@@ -50,6 +51,7 @@ export function QuickViewDialog({
             <Dialog.Title className="text-sm font-semibold">
               Vista rápida
             </Dialog.Title>
+            <DownloadStoryButton product={product} />
             <Dialog.Close className="rounded-xl p-2 hover:bg-black/5">
               <X className="h-5 w-5" />
             </Dialog.Close>
@@ -71,6 +73,7 @@ export function QuickViewDialog({
                 <p className="mt-2 text-base font-semibold">
                   {formatMoney(product.price)}
                 </p>
+                
 
                 {product.description && (
                   <p className="mt-3 text-sm text-black/70">

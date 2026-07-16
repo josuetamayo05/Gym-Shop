@@ -8,6 +8,7 @@ import { ProductDetail } from "./pages/ProductDetail";
 import { ProductShare } from "./pages/ProductShare";
 import { ExportAssets } from "./pages/ExportAssets";
 import { MobileTools } from "./pages/MobileTools";
+import { MobileCollages } from "./pages/MobileCollages";
 
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/share/:slug" element={<ProductShare />} />
         <Route path="/export" element={<ExportAssets />} />
         <Route path="/mobile" element={<MobileTools />} />
+        <Route path="/mobile-collages" element={<MobileCollages />} />
       </Routes>
 
       <CartDrawer />

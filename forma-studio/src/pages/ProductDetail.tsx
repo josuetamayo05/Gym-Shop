@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-
+import { DownloadStoryButton } from "../components/DownloadStoryButton";
 import { getProductBySlug } from "../entities/product/model/selectors";
 import { ProductGallery } from "../components/ProductGallery";
 import { formatMoney } from "../utils/money";
@@ -55,7 +55,7 @@ function ProductDetailView({ slug }: { slug: string }) {
           <ChevronLeft className="h-4 w-4" />
           Volver
         </button>
-
+          <DownloadStoryButton product={product} />
         <Link to="/" className="text-sm font-semibold text-black/60 hover:text-black">
           Catálogo
         </Link>
