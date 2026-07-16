@@ -8,7 +8,7 @@ import { ShareFrame } from "../components/ShareFrame";
 import { buildWhatsAppLink } from "../utils/whatsapp";
 
 
-const PHONE = (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) ?? "";
+const PHONE = "5350121476";
 
 function waitNextPaint() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
