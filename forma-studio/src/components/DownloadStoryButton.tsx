@@ -86,7 +86,7 @@ export function DownloadStoryButton({ product }: { product: Product }) {
       {/* Render fuera de pantalla (NO opacity-0 para evitar PNG negro en iOS) */}
       <div className="fixed left-[-10000px] top-0">
         <div ref={frameRef}>
-          <ShareFrame product={product} format="photo" whatsapp={WHATSAPP} />
+          <ShareFrame product={product} format="photo" whatsapp={WHATSAPP} shape="square" />
         </div>
       </div>
     </>

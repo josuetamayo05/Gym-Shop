@@ -316,7 +316,7 @@ export function MobileExportTemplates() {
       <div className="fixed left-[-10000px] top-0">
         <div ref={frameRef}>
           {currentRenderProduct && (
-            <ShareFrame product={currentRenderProduct} format="photo" whatsapp={WHATSAPP} />
+            <ShareFrame product={currentRenderProduct} format="photo" whatsapp={WHATSAPP} shape="square" />
           )}
         </div>
       </div>
