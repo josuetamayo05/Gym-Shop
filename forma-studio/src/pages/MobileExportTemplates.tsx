@@ -1,11 +1,13 @@
 import { useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
-import { flushSync } from "react-dom";
+
 import { PRODUCTS } from "../entities/product/model/products";
 import type { Product } from "../entities/product/model/types";
 import { formatMoney } from "../utils/money";
 import { ShareFrame } from "../components/ShareFrame";
-import type { RefObject } from "react";
+import { buildWhatsAppLink } from "../utils/whatsapp";
+
+const WHATSAPP = "5350121476";
 
 type Mode = "publico" | "gestores";
 
@@ -13,20 +15,9 @@ function waitNextPaint() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
 
-async function waitForFrameSlug(
-  expectedSlug: string,
-  frameRef: RefObject<HTMLElement | null>,
-  timeoutMs = 2000
-) {
-  const start = Date.now();
-
-  while (Date.now() - start < timeoutMs) {
-    const currentSlug = frameRef.current?.dataset?.shareSlug;
-    if (currentSlug === expectedSlug) return;
-    await waitNextPaint();
-  }
-
-  throw new Error(`Timeout esperando render de ${expectedSlug}`);
+function getBatchProducts(batchIndex: number, batchSize: number) {
+  const start = batchIndex * batchSize;
+  return PRODUCTS.slice(start, start + batchSize);
 }
 
 async function waitForImages(container: HTMLElement) {
@@ -47,7 +38,7 @@ async function captureNodePng(node: HTMLElement) {
 
   const canvas = await html2canvas(node, {
     backgroundColor: "#000000",
-    scale: 3, // 360px => 1080px
+    scale: 3,
     useCORS: true,
   });
 
@@ -58,45 +49,55 @@ async function captureNodePng(node: HTMLElement) {
   return blob;
 }
 
-function getBatchProducts(batchIndex: number, batchSize: number) {
-  const start = batchIndex * batchSize;
-  return PRODUCTS.slice(start, start + batchSize);
-}
+function buildPublishText(products: Product[]) {
+  const preset =
+    "Hola! Vengo de Facebook. Me interesa un producto del catálogo. Producto: ";
+  const waLink = WHATSAPP ? buildWhatsAppLink(WHATSAPP, preset) : "";
 
-// Caption (info) igual en ambos modos: nombre + precio base
-function buildCaption(products: Product[], label: string) {
   const lines: string[] = [];
-  lines.push(`GYM STUDIO — ${label}`);
+  lines.push("GYM STUDIO");
   lines.push("");
+  lines.push("Productos:");
+
   for (const p of products) {
-    lines.push(`• ${p.name} — Base: ${formatMoney(p.price)}`);
+    lines.push(`• ${p.name} — ${formatMoney(p.price)}`);
   }
+
   lines.push("");
-  lines.push("Edita el texto y añade tu margen si eres gestor/a.");
+  lines.push("Pedir por WhatsApp:");
+  lines.push(waLink || "WhatsApp no configurado");
+  lines.push("");
+  lines.push("Escribe el nombre del producto y tu talla.");
+
   return lines.join("\n");
 }
 
 export function MobileExportTemplates() {
   const [mode, setMode] = useState<Mode>("publico");
+
   const [batchSize, setBatchSize] = useState(10);
   const [batchIndex, setBatchIndex] = useState(0);
+
+  const [copiedWhich, setCopiedWhich] = useState<"batch" | "all" | null>(null);
+  function markCopied(which: "batch" | "all") {
+    setCopiedWhich(which);
+    window.setTimeout(() => setCopiedWhich(null), 1200);
+  }
+
   const [autoMode, setAutoMode] = useState(false);
 
-  // Renderizamos 1 producto offscreen para capturar imagen por imagen
+  // Renderizamos 1 producto offscreen
   const [renderIndex, setRenderIndex] = useState(0);
-  const currentRenderProduct = useMemo(() => PRODUCTS[renderIndex], [renderIndex]);
+  const currentRenderProduct = useMemo(
+    () => PRODUCTS[renderIndex],
+    [renderIndex]
+  );
+
   const frameRef = useRef<HTMLDivElement | null>(null);
 
   const [preparing, setPreparing] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState("");
-
-  // UI Copiado (botón)
-  const [copied, setCopied] = useState(false);
-  function markCopied() {
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1200);
-  }
 
   const totalBatches = useMemo(
     () => Math.max(1, Math.ceil(PRODUCTS.length / batchSize)),
@@ -108,26 +109,24 @@ export function MobileExportTemplates() {
     [batchIndex, batchSize]
   );
 
-  const showPriceInImage = mode === "publico"; // gestores => false
+  const showPriceInImage = mode === "publico";
 
-  async function generateForProducts(list: Product[]) {
+  // Genera imágenes para una lista específica (evita desincronización)
+  async function generateForList(list: Product[]) {
     const out: File[] = [];
 
     for (const p of list) {
       const idx = PRODUCTS.findIndex((x) => x.id === p.id);
       if (idx === -1) continue;
 
-      flushSync(() => setRenderIndex(idx));
+      setRenderIndex(idx);
 
-      // espera que el DOM realmente sea el producto p
-      await waitForFrameSlug(p.slug, frameRef);
+      await waitNextPaint();
       await waitNextPaint();
 
-      const node = frameRef.current;
-      if (!node) continue;
+      if (!frameRef.current) continue;
 
-      let blob = await captureNodePng(node);
-      if (!blob) blob = await captureNodePng(node);
+      const blob = await captureNodePng(frameRef.current);
       if (!blob) continue;
 
       out.push(new File([blob], `${p.slug}-${mode}.png`, { type: "image/png" }));
@@ -142,10 +141,10 @@ export function MobileExportTemplates() {
     setPreparing(true);
 
     try {
-      const out = await generateForProducts(batchProducts);
+      const out = await generateForList(batchProducts);
       setFiles(out);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error generando imágenes");
+      setError(e instanceof Error ? e.message : "Error generando plantillas");
     } finally {
       setPreparing(false);
     }
@@ -155,7 +154,11 @@ export function MobileExportTemplates() {
     setError("");
 
     const nav = navigator as Navigator & {
-      share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void>;
+      share?: (data: {
+        files?: File[];
+        title?: string;
+        text?: string;
+      }) => Promise<void>;
       canShare?: (data: { files?: File[] }) => boolean;
     };
 
@@ -163,66 +166,68 @@ export function MobileExportTemplates() {
       setError("Primero genera el lote.");
       return;
     }
+
     if (!nav.share || !nav.canShare) {
-      setError("Tu navegador no soporta compartir múltiples archivos. Usa Safari actualizado.");
+      setError(
+        "Tu navegador no soporta compartir múltiples archivos. Usa Safari actualizado."
+      );
       return;
     }
+
     if (!nav.canShare({ files })) {
       setError("El lote es demasiado grande para iPhone. Baja a 5–10.");
       return;
     }
 
-    const labelMode =
-      mode === "gestores" ? "Gestores (sin precio en imagen)" : "Público (con precio en imagen)";
-    const caption = buildCaption(
-      batchProducts,
-      `Lote ${batchIndex + 1}/${totalBatches} — ${labelMode}`
-    );
-
     try {
       await nav.share({
         files,
-        title: "GYM STUDIO",
-        text: caption,
+        title: "GYM STUDIO - Plantillas",
+        text:
+          mode === "publico"
+            ? `Lote ${batchIndex + 1}/${totalBatches} — Público (con precio)`
+            : `Lote ${batchIndex + 1}/${totalBatches} — Gestores (sin precio)`,
       });
 
-      // Si autoMode: preparar siguiente lote automáticamente
+      // Auto: preparar siguiente lote
       if (autoMode && batchIndex < totalBatches - 1) {
-        const nextBatchIndex = batchIndex + 1;
-        const nextProducts = getBatchProducts(nextBatchIndex, batchSize);
+        const nextIndex = batchIndex + 1;
+        const nextList = getBatchProducts(nextIndex, batchSize);
 
-        setBatchIndex(nextBatchIndex);
+        setBatchIndex(nextIndex);
         setFiles([]);
-        setPreparing(true);
 
-        const nextFiles = await generateForProducts(nextProducts);
+        setPreparing(true);
+        const nextFiles = await generateForList(nextList);
         setFiles(nextFiles);
         setPreparing(false);
       }
     } catch {
       // cancelado
-    } finally {
-      setPreparing(false);
     }
   }
 
-  async function copyCaption() {
-    const labelMode =
-      mode === "gestores" ? "Gestores (sin precio en imagen)" : "Público (con precio en imagen)";
-    const caption = buildCaption(
-      batchProducts,
-      `Lote ${batchIndex + 1}/${totalBatches} — ${labelMode}`
-    );
-
+  async function copyBatchText() {
+    const text = buildPublishText(batchProducts);
     try {
-      await navigator.clipboard.writeText(caption);
-      markCopied();
+      await navigator.clipboard.writeText(text);
+      markCopied("batch");
     } catch {
-      prompt("Copia este texto:", caption);
+      prompt("Copia este texto:", text);
     }
   }
 
-  async function startAuto() {
+  async function copyAllText() {
+    const text = buildPublishText(PRODUCTS);
+    try {
+      await navigator.clipboard.writeText(text);
+      markCopied("all");
+    } catch {
+      prompt("Copia este texto:", text);
+    }
+  }
+
+  async function startAutoExport() {
     setAutoMode(true);
     setBatchIndex(0);
     setFiles([]);
@@ -232,13 +237,10 @@ export function MobileExportTemplates() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6">
-      <h1 className="text-xl font-semibold">Mobile Export</h1>
-      <p className="mt-2 text-sm text-black/60">
-        Genera 1 plantilla por producto (4:5). En Gestores se exporta sin precio en la imagen.
-      </p>
+      <h1 className="text-xl font-semibold">Exportar plantillas (iPhone)</h1>
 
-      {/* Selector modo */}
-      <div className="mt-4 flex flex-wrap gap-2">
+      {/* Sección Público / Gestores */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <button
           onClick={() => {
             setMode("publico");
@@ -251,7 +253,7 @@ export function MobileExportTemplates() {
               : "border-black/10 bg-white hover:bg-black/5")
           }
         >
-          Público
+          Público (con precio)
         </button>
 
         <button
@@ -279,7 +281,7 @@ export function MobileExportTemplates() {
         </label>
       </div>
 
-      <section className="mt-4 space-y-3 rounded-3xl border border-black/10 bg-white p-4">
+      <section className="mt-5 space-y-3 rounded-3xl border border-black/10 bg-white p-4">
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-sm font-semibold">
             Lote:&nbsp;
@@ -289,12 +291,14 @@ export function MobileExportTemplates() {
                 setBatchSize(Number(e.target.value));
                 setBatchIndex(0);
                 setFiles([]);
+                setAutoMode(false);
               }}
               className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
             >
               <option value={5}>5</option>
               <option value={10}>10 (recomendado)</option>
               <option value={15}>15</option>
+              <option value={20}>20</option>
             </select>
           </label>
 
@@ -303,6 +307,7 @@ export function MobileExportTemplates() {
               onClick={() => {
                 setBatchIndex((x) => Math.max(0, x - 1));
                 setFiles([]);
+                setAutoMode(false);
               }}
               className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold"
             >
@@ -317,6 +322,7 @@ export function MobileExportTemplates() {
               onClick={() => {
                 setBatchIndex((x) => Math.min(totalBatches - 1, x + 1));
                 setFiles([]);
+                setAutoMode(false);
               }}
               className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold"
             >
@@ -331,7 +337,7 @@ export function MobileExportTemplates() {
             disabled={preparing}
             className="rounded-2xl bg-[#D8C3A5] px-4 py-2 text-sm font-semibold text-black disabled:opacity-60"
           >
-            {preparing ? "Generando…" : "Generar imágenes"}
+            {preparing ? "Generando…" : "Generar lote"}
           </button>
 
           <button
@@ -339,40 +345,50 @@ export function MobileExportTemplates() {
             disabled={!files.length || preparing}
             className="rounded-2xl bg-black px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
           >
-            {autoMode ? `Compartir y siguiente (${files.length})` : `Compartir en WhatsApp (${files.length})`}
+            {autoMode
+              ? `Guardar/Compartir y siguiente (${files.length})`
+              : `Guardar/Compartir (${files.length})`}
           </button>
 
           <button
-            onClick={copyCaption}
+            onClick={copyBatchText}
             className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
           >
-            {copied ? "Copiado" : "Copiar texto (nombre + base)"}
+            {copiedWhich === "batch" ? "Copiado" : "Copiar texto (este lote)"}
           </button>
 
           <button
-            onClick={startAuto}
+            onClick={copyAllText}
             className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
           >
-            Iniciar auto (desde lote 1)
+            {copiedWhich === "all" ? "Copiado" : "Copiar texto (todo)"}
           </button>
         </div>
 
-        {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+        <div className="flex flex-wrap items-center gap-2 pt-2">
+          <button
+            onClick={startAutoExport}
+            className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
+          >
+            Iniciar exportación completa (modo automático)
+          </button>
 
-        <p className="text-xs text-black/50">
-          iPhone: Compartir → WhatsApp → elige grupo/canal → enviar. Si falla, baja el lote a 5.
-        </p>
+          <span className="text-xs text-black/50">
+            Luego solo toca “Guardar/Compartir y siguiente”.
+          </span>
+        </div>
+
+        {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
       </section>
 
-      {/* Render fuera de pantalla para capturar (NO opacity-0 para evitar capturas negras en iOS) */}
+      {/* Render fuera de pantalla */}
       <div className="fixed left-[-10000px] top-0">
         <div ref={frameRef}>
           {currentRenderProduct && (
             <ShareFrame
-              key={currentRenderProduct.id}
-              ref={frameRef}
               product={currentRenderProduct}
               format="photo"
+              whatsapp={WHATSAPP}
               shape="square"
               showPrice={showPriceInImage}
             />
