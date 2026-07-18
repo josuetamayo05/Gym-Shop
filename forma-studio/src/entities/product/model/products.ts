@@ -103,7 +103,7 @@ export const PRODUCTS: Product[] = [
     name: "Licra Levanta Glúteo — Mujer (Modelo 1)",
     category: "Mujer",
     productType: "Licra",
-    price: 12,
+    price: 7,
     featured: true,
     images: [
       "/products/licras/photo_29_2026-07-13_15-01-28.jpg",
