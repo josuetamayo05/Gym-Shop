@@ -64,6 +64,7 @@ export const ShareFrame = forwardRef<
     return (
       <div
         ref={ref}
+        data-share-slug={p.slug}
         className={`${frameClass} relative overflow-hidden bg-black ${radiusRoot}`}
       >
         {/* Foto full */}

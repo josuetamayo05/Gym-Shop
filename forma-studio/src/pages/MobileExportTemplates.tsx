@@ -1,15 +1,32 @@
 import { useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
-
+import { flushSync } from "react-dom";
 import { PRODUCTS } from "../entities/product/model/products";
 import type { Product } from "../entities/product/model/types";
 import { formatMoney } from "../utils/money";
 import { ShareFrame } from "../components/ShareFrame";
+import type { RefObject } from "react";
 
 type Mode = "publico" | "gestores";
 
 function waitNextPaint() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+}
+
+async function waitForFrameSlug(
+  expectedSlug: string,
+  frameRef: RefObject<HTMLElement | null>,
+  timeoutMs = 2000
+) {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    const currentSlug = frameRef.current?.dataset?.shareSlug;
+    if (currentSlug === expectedSlug) return;
+    await waitNextPaint();
+  }
+
+  throw new Error(`Timeout esperando render de ${expectedSlug}`);
 }
 
 async function waitForImages(container: HTMLElement) {
@@ -94,21 +111,23 @@ export function MobileExportTemplates() {
   const showPriceInImage = mode === "publico"; // gestores => false
 
   async function generateForProducts(list: Product[]) {
-    if (!frameRef.current) return [];
-
     const out: File[] = [];
 
     for (const p of list) {
       const idx = PRODUCTS.findIndex((x) => x.id === p.id);
-      setRenderIndex(idx);
+      if (idx === -1) continue;
 
-      // Espera render estable
+      flushSync(() => setRenderIndex(idx));
+
+      // espera que el DOM realmente sea el producto p
+      await waitForFrameSlug(p.slug, frameRef);
       await waitNextPaint();
-      await waitNextPaint();
 
-      if (!frameRef.current) continue;
+      const node = frameRef.current;
+      if (!node) continue;
 
-      const blob = await captureNodePng(frameRef.current);
+      let blob = await captureNodePng(node);
+      if (!blob) blob = await captureNodePng(node);
       if (!blob) continue;
 
       out.push(new File([blob], `${p.slug}-${mode}.png`, { type: "image/png" }));
@@ -350,6 +369,8 @@ export function MobileExportTemplates() {
         <div ref={frameRef}>
           {currentRenderProduct && (
             <ShareFrame
+              key={currentRenderProduct.id}
+              ref={frameRef}
               product={currentRenderProduct}
               format="photo"
               shape="square"
