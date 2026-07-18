@@ -32,7 +32,7 @@ export const PRODUCTS: Product[] = [
     name: "Pulóver Deportivo — Mujer",
     category: "Mujer",
     productType: "Pulover",
-    price: 12,
+    price: 13,
     images: [
       "/products/blusas/photo_14_2026-07-13_15-01-27.jpg",
       "/products/blusas/photo_15_2026-07-13_15-01-27.jpg",

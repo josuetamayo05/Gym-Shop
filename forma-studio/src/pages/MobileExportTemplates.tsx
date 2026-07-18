@@ -9,7 +9,7 @@ import { buildWhatsAppLink } from "../utils/whatsapp";
 
 const WHATSAPP = "5350121476";
 
-type Mode = "publico" | "gestores";
+
 
 function waitNextPaint() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -72,8 +72,12 @@ function buildPublishText(products: Product[]) {
   return lines.join("\n");
 }
 
+
+
 export function MobileExportTemplates() {
+  type Mode = "publico" | "gestores";
   const [mode, setMode] = useState<Mode>("publico");
+  //const showPriceInImage = mode === "publico";
 
   const [batchSize, setBatchSize] = useState(10);
   const [batchIndex, setBatchIndex] = useState(0);
@@ -139,6 +143,9 @@ export function MobileExportTemplates() {
     setError("");
     setFiles([]);
     setPreparing(true);
+
+    await waitNextPaint();
+    await waitNextPaint();
 
     try {
       const out = await generateForList(batchProducts);
@@ -245,6 +252,7 @@ export function MobileExportTemplates() {
           onClick={() => {
             setMode("publico");
             setFiles([]);
+            setAutoMode(false);
           }}
           className={
             "rounded-2xl border px-4 py-2 text-sm font-semibold " +
@@ -260,6 +268,7 @@ export function MobileExportTemplates() {
           onClick={() => {
             setMode("gestores");
             setFiles([]);
+            setAutoMode(false);
           }}
           className={
             "rounded-2xl border px-4 py-2 text-sm font-semibold " +
@@ -386,11 +395,12 @@ export function MobileExportTemplates() {
         <div ref={frameRef}>
           {currentRenderProduct && (
             <ShareFrame
+              key={`${currentRenderProduct?.id}-${mode}`}  // fuerza re-render al cambiar modo
               product={currentRenderProduct}
               format="photo"
               whatsapp={WHATSAPP}
               shape="square"
-              showPrice={showPriceInImage}
+              showPrice={showPriceInImage}                // público true / gestores false
             />
           )}
         </div>
