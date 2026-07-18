@@ -20,11 +20,12 @@ export const ShareFrame = forwardRef<
   {
     product: Product;
     format: ShareFormat;
-    whatsapp?: string; // opcional (no lo usamos en el template ahora)
+    whatsapp?: string; // opcional
     shape?: ShareShape; // rounded o square
+    showPrice?: boolean; // gestores -> false
   }
 >(function ShareFrame(
-  { product: p, format, shape = "square" },
+  { product: p, format, shape = "square", showPrice = true },
   ref
 ) {
   const images = p.images?.length ? p.images : ["/products/placeholder.jpg"];
@@ -37,10 +38,10 @@ export const ShareFrame = forwardRef<
     format === "photo"
       ? "w-[360px] aspect-[4/5]" // 1080x1350
       : format === "story"
-        ? "w-[360px] aspect-[9/16]" // 1080x1920 (si lo usas)
+        ? "w-[360px] aspect-[9/16]" // 1080x1920
         : format === "post"
           ? "w-[360px] aspect-[4/5]"
-          : "w-[360px] aspect-[3/4]"; // shein-ish 1080x1440
+          : "w-[360px] aspect-[3/4]"; // 1080x1440
 
   // Bordes: para export, usa square
   const radiusRoot = shape === "rounded" ? "rounded-[28px]" : "rounded-none";
@@ -58,7 +59,7 @@ export const ShareFrame = forwardRef<
   const showDesc = Boolean(p.description) && nameLen <= 62;
   const descText = clampText(p.description ?? "", 78);
 
-  // TEMPLATE PRINCIPAL: "photo" (4:5) sin estirar la foto
+  // TEMPLATE PRINCIPAL: "photo" (4:5)
   if (format === "photo") {
     return (
       <div
@@ -83,7 +84,6 @@ export const ShareFrame = forwardRef<
                 {p.category} · {p.productType}
               </p>
 
-              {/* Nombre: no lo cortamos “por CSS raro”, pero evitamos que rompa layout */}
               <h1
                 className={`mt-1 font-semibold leading-snug text-white ${nameClass}`}
                 style={{ wordBreak: "break-word" }}
@@ -91,16 +91,17 @@ export const ShareFrame = forwardRef<
                 {p.name}
               </h1>
 
-              {/* Descripción solo si hay espacio */}
               {showDesc && (
                 <p className="mt-1 text-xs text-white/80">{descText}</p>
               )}
             </div>
 
-            {/* Precio SIEMPRE visible */}
-            <div className="shrink-0 text-right">
-              <p className="text-2xl font-semibold text-white">{priceText}</p>
-            </div>
+            {/* ✅ Precio opcional (Gestores = false) */}
+            {showPrice && (
+              <div className="shrink-0 text-right">
+                <p className="text-2xl font-semibold text-white">{priceText}</p>
+              </div>
+            )}
           </div>
 
           {/* Miniaturas */}
@@ -134,7 +135,7 @@ export const ShareFrame = forwardRef<
     );
   }
 
-  // Si llegas a usar story/post/shein: fallback simple (no rompe)
+  // Fallback simple
   return (
     <div
       ref={ref}
@@ -148,7 +149,9 @@ export const ShareFrame = forwardRef<
       <div className="absolute inset-x-0 bottom-0 p-4">
         <div className="rounded-2xl bg-black/60 p-3 text-white backdrop-blur">
           <p className="text-xs font-semibold">{p.name}</p>
-          <p className="mt-1 text-sm font-semibold">{priceText}</p>
+          {showPrice && (
+            <p className="mt-1 text-sm font-semibold">{priceText}</p>
+          )}
         </div>
       </div>
     </div>
