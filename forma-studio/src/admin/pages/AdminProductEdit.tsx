@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
-import { db, storage } from "../../firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db} from "../../firebase";
+import { uploadCloudinaryImages } from "../uploadCloudinary";
 
 import { CATEGORIES, PRODUCT_TYPES, SIZES } from "../constants";
 import { slugify } from "../slug";
@@ -71,18 +71,8 @@ export function AdminProductEdit() {
   }
 
   async function uploadImages(productId: string) {
-    const urls: string[] = [];
-    for (const file of newFiles) {
-      const fileRef = ref(
-        storage,
-        `products/${productId}/${nowMs()}-${file.name}`
-      );
-      await uploadBytes(fileRef, file);
-      const url = await getDownloadURL(fileRef);
-      urls.push(url);
+    return await uploadCloudinaryImages(productId, newFiles);
     }
-    return urls;
-  }
 
   async function handleSave() {
     setSaving(true);

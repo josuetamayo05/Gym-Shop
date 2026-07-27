@@ -1,23 +1,23 @@
 import { useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 
-import { PRODUCTS } from "../entities/product/model/products";
 import type { Product } from "../entities/product/model/types";
 import { formatMoney } from "../utils/money";
 import { ShareFrame } from "../components/ShareFrame";
 import { buildWhatsAppLink } from "../utils/whatsapp";
+import { useProducts } from "../entities/product/model/useProducts";
 
 const WHATSAPP = "5350121476";
 
-
+type Mode = "publico" | "gestores";
 
 function waitNextPaint() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
 
-function getBatchProducts(batchIndex: number, batchSize: number) {
+function getBatchProducts(list: Product[], batchIndex: number, batchSize: number) {
   const start = batchIndex * batchSize;
-  return PRODUCTS.slice(start, start + batchSize);
+  return list.slice(start, start + batchSize);
 }
 
 async function waitForImages(container: HTMLElement) {
@@ -38,7 +38,7 @@ async function captureNodePng(node: HTMLElement) {
 
   const canvas = await html2canvas(node, {
     backgroundColor: "#000000",
-    scale: 3,
+    scale: 3, // 360px => 1080px
     useCORS: true,
   });
 
@@ -72,12 +72,11 @@ function buildPublishText(products: Product[]) {
   return lines.join("\n");
 }
 
-
-
 export function MobileExportTemplates() {
-  type Mode = "publico" | "gestores";
+  // 🔥 Firestore si hay datos, si no fallback a local
+  const { products, source } = useProducts();
+
   const [mode, setMode] = useState<Mode>("publico");
-  //const showPriceInImage = mode === "publico";
 
   const [batchSize, setBatchSize] = useState(10);
   const [batchIndex, setBatchIndex] = useState(0);
@@ -93,8 +92,8 @@ export function MobileExportTemplates() {
   // Renderizamos 1 producto offscreen
   const [renderIndex, setRenderIndex] = useState(0);
   const currentRenderProduct = useMemo(
-    () => PRODUCTS[renderIndex],
-    [renderIndex]
+    () => products[renderIndex],
+    [products, renderIndex]
   );
 
   const frameRef = useRef<HTMLDivElement | null>(null);
@@ -104,27 +103,27 @@ export function MobileExportTemplates() {
   const [error, setError] = useState("");
 
   const totalBatches = useMemo(
-    () => Math.max(1, Math.ceil(PRODUCTS.length / batchSize)),
-    [batchSize]
+    () => Math.max(1, Math.ceil(products.length / batchSize)),
+    [products.length, batchSize]
   );
 
-  const batchProducts = useMemo(
-    () => getBatchProducts(batchIndex, batchSize),
-    [batchIndex, batchSize]
-  );
+  const batchProducts = useMemo(() => {
+    return getBatchProducts(products, batchIndex, batchSize);
+  }, [products, batchIndex, batchSize]);
 
   const showPriceInImage = mode === "publico";
 
-  // Genera imágenes para una lista específica (evita desincronización)
+  // Genera un lote para una lista específica (evita desincronización en auto)
   async function generateForList(list: Product[]) {
     const out: File[] = [];
 
     for (const p of list) {
-      const idx = PRODUCTS.findIndex((x) => x.id === p.id);
+      const idx = products.findIndex((x) => x.id === p.id);
       if (idx === -1) continue;
 
       setRenderIndex(idx);
 
+      // Espera render
       await waitNextPaint();
       await waitNextPaint();
 
@@ -144,9 +143,6 @@ export function MobileExportTemplates() {
     setFiles([]);
     setPreparing(true);
 
-    await waitNextPaint();
-    await waitNextPaint();
-
     try {
       const out = await generateForList(batchProducts);
       setFiles(out);
@@ -161,11 +157,7 @@ export function MobileExportTemplates() {
     setError("");
 
     const nav = navigator as Navigator & {
-      share?: (data: {
-        files?: File[];
-        title?: string;
-        text?: string;
-      }) => Promise<void>;
+      share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void>;
       canShare?: (data: { files?: File[] }) => boolean;
     };
 
@@ -175,9 +167,7 @@ export function MobileExportTemplates() {
     }
 
     if (!nav.share || !nav.canShare) {
-      setError(
-        "Tu navegador no soporta compartir múltiples archivos. Usa Safari actualizado."
-      );
+      setError("Tu navegador no soporta compartir múltiples archivos. Usa Safari actualizado.");
       return;
     }
 
@@ -199,7 +189,7 @@ export function MobileExportTemplates() {
       // Auto: preparar siguiente lote
       if (autoMode && batchIndex < totalBatches - 1) {
         const nextIndex = batchIndex + 1;
-        const nextList = getBatchProducts(nextIndex, batchSize);
+        const nextList = getBatchProducts(products, nextIndex, batchSize);
 
         setBatchIndex(nextIndex);
         setFiles([]);
@@ -225,7 +215,7 @@ export function MobileExportTemplates() {
   }
 
   async function copyAllText() {
-    const text = buildPublishText(PRODUCTS);
+    const text = buildPublishText(products);
     try {
       await navigator.clipboard.writeText(text);
       markCopied("all");
@@ -246,8 +236,12 @@ export function MobileExportTemplates() {
     <main className="mx-auto max-w-3xl px-4 py-6">
       <h1 className="text-xl font-semibold">Exportar plantillas (iPhone)</h1>
 
-      {/* Sección Público / Gestores */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <p className="mt-2 text-sm text-black/60">
+        Fuente: <b>{source}</b> · Productos: <b>{products.length}</b>
+      </p>
+
+      {/* Público / Gestores */}
+      <div className="mt-4 flex flex-wrap gap-2">
         <button
           onClick={() => {
             setMode("publico");
@@ -343,7 +337,7 @@ export function MobileExportTemplates() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={generateCurrentBatch}
-            disabled={preparing}
+            disabled={preparing || products.length === 0}
             className="rounded-2xl bg-[#D8C3A5] px-4 py-2 text-sm font-semibold text-black disabled:opacity-60"
           >
             {preparing ? "Generando…" : "Generar lote"}
@@ -377,7 +371,8 @@ export function MobileExportTemplates() {
         <div className="flex flex-wrap items-center gap-2 pt-2">
           <button
             onClick={startAutoExport}
-            className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
+            disabled={products.length === 0}
+            className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5 disabled:opacity-60"
           >
             Iniciar exportación completa (modo automático)
           </button>
@@ -390,17 +385,17 @@ export function MobileExportTemplates() {
         {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
       </section>
 
-      {/* Render fuera de pantalla */}
+      {/* Render fuera de pantalla (NO opacity-0 para evitar capturas negras en iOS) */}
       <div className="fixed left-[-10000px] top-0">
         <div ref={frameRef}>
           {currentRenderProduct && (
             <ShareFrame
-              key={`${currentRenderProduct?.id}-${mode}`}  // fuerza re-render al cambiar modo
+              key={`${currentRenderProduct.id}-${mode}`} // asegura que el cambio de modo se refleje
               product={currentRenderProduct}
               format="photo"
               whatsapp={WHATSAPP}
               shape="square"
-              showPrice={showPriceInImage}                // público true / gestores false
+              showPrice={showPriceInImage}
             />
           )}
         </div>

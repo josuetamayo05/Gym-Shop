@@ -69,6 +69,7 @@ export const ShareFrame = forwardRef<
       >
         {/* Foto full */}
         <img
+          crossOrigin="anonymous"
           src={absUrl(main)}
           alt={p.name}
           className="absolute inset-0 h-full w-full object-cover"
@@ -117,6 +118,7 @@ export const ShareFrame = forwardRef<
                   className={`relative h-14 w-14 overflow-hidden border border-white/15 bg-white/10 ${radiusThumb}`}
                 >
                   <img
+                    crossOrigin="anonymous"
                     src={absUrl(src)}
                     alt={`${p.name} ${i + 1}`}
                     className="h-full w-full object-cover"
@@ -143,6 +145,7 @@ export const ShareFrame = forwardRef<
       className={`${frameClass} relative overflow-hidden bg-black ${radiusRoot}`}
     >
       <img
+        crossOrigin="anonymous"
         src={absUrl(main)}
         alt={p.name}
         className="absolute inset-0 h-full w-full object-cover"

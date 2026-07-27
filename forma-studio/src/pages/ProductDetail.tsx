@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { DownloadStoryButton } from "../components/DownloadStoryButton";
-import { getProductBySlug } from "../entities/product/model/selectors";
+import { useProducts } from "../entities/product/model/useProducts";
 import { ProductGallery } from "../components/ProductGallery";
 import { formatMoney } from "../utils/money";
 import { useCartStore } from "../store/cartStore";
@@ -18,10 +18,12 @@ function ProductDetailView({ slug }: { slug: string }) {
   const add = useCartStore((s) => s.add);
   const setCartOpen = useUIStore((s) => s.setCartOpen);
 
-  const product = useMemo(() => {
-    if (!slug) return undefined;
-    return getProductBySlug(slug);
-  }, [slug]);
+  const { products } = useProducts();
+
+  const product = useMemo(
+    () => products.find((p) => p.slug === slug),
+    [products, slug]
+  );
 
   const [size, setSize] = useState<string>("");
 
