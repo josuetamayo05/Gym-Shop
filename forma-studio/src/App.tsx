@@ -10,6 +10,10 @@ import { ExportAssets } from "./pages/ExportAssets";
 import { MobileTools } from "./pages/MobileTools";
 import { MobileCollages } from "./pages/MobileCollages";
 import { MobileExportTemplates } from "./pages/MobileExportTemplates";
+import { AdminLogin } from "./admin/pages/AdminLogin";
+import { AdminProducts } from "./admin/pages/AdminProducts";
+import { AdminProductEdit } from "./admin/pages/AdminProductEdit";
+import { RequireAdmin } from "./admin/RequireAdmin";
 
 export default function App() {
   return (
@@ -24,6 +28,10 @@ export default function App() {
         <Route path="/mobile" element={<MobileTools />} />
         <Route path="/mobile-collages" element={<MobileCollages />} />
         <Route path="/mobile-export" element={<MobileExportTemplates />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/products" element={<RequireAdmin><AdminProducts /></RequireAdmin>} />
+        <Route path="/admin/products/new" element={<RequireAdmin><AdminProductEdit /></RequireAdmin>} />
+        <Route path="/admin/products/:id" element={<RequireAdmin><AdminProductEdit /></RequireAdmin>} />
       </Routes>
 
       <CartDrawer />
