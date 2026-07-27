@@ -6,52 +6,44 @@ import { useNavigate } from "react-router-dom";
 
 export function AdminLogin() {
   const nav = useNavigate();
-  const [email, setEmail] = useState("j70648423@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
       nav("/admin/products");
     } catch (err) {
-      const error = err as FirebaseError;
-      console.error("Firebase login error:", error.code, error.message);
+      const e = err as FirebaseError;
+      console.error(e.code, e.message);
 
-      switch (error.code) {
+      switch (e.code) {
         case "auth/invalid-credential":
         case "auth/wrong-password":
         case "auth/user-not-found":
         case "auth/invalid-login-credentials":
           setError("Email o contraseña incorrectos.");
           break;
-
-        case "auth/invalid-email":
-          setError("El formato del email no es válido.");
-          break;
-
         case "auth/too-many-requests":
-          setError("Demasiados intentos. Espera unos minutos e inténtalo otra vez.");
+          setError("Demasiados intentos. Espera unos minutos.");
           break;
-
         case "auth/network-request-failed":
-          setError("Error de red. Revisa tu conexión o la configuración.");
+          setError("Error de red. Revisa tu conexión.");
           break;
-
-        case "auth/user-disabled":
-          setError("Esta cuenta ha sido deshabilitada.");
-          break;
-
         case "auth/operation-not-allowed":
-          setError("El login con email/password no está habilitado en Firebase.");
+          setError("Email/Password no está activado en Firebase.");
           break;
-
         default:
-          setError(`Error: ${error.code}`);
+          setError(`Error: ${e.code}`);
       }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -66,6 +58,7 @@ export function AdminLogin() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
         <input
           className="w-full rounded-2xl border border-black/10 px-3 py-2 text-sm outline-none"
@@ -73,12 +66,19 @@ export function AdminLogin() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
-        {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+        {error && (
+          <p className="text-sm font-semibold text-red-600">{error}</p>
+        )}
 
-        <button className="w-full rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white">
-          Entrar
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {loading ? "Entrando…" : "Entrar"}
         </button>
       </form>
     </main>

@@ -4,11 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyA3jBzLJaZO0xjmIne94f25W7UoAkI6Dp0",
+  authDomain: "gym-shop-442e2.firebaseapp.com",
+  projectId: "gym-shop-442e2",
+  storageBucket: "gym-shop-442e2.firebasestorage.app",
+  messagingSenderId: "986652603992",
+  appId: "1:986652603992:web:fa172259d9dce92d11bc2d",
+  measurementId: "G-VBH3FVT8HS"
 };
 
 const app = initializeApp(firebaseConfig);

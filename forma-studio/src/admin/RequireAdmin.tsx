@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth } from "../firebase";
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL as string;
-
 export function RequireAdmin({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null | undefined>(undefined);
 
@@ -12,13 +10,20 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
     return onAuthStateChanged(auth, (u) => setUser(u));
   }, []);
 
+  // Cargando sesión
   if (user === undefined) {
-    return <div className="p-6 text-sm text-black/60">Cargando…</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-sm text-black/60">Cargando…</p>
+      </div>
+    );
   }
 
-  if (!user || user.email !== ADMIN_EMAIL) {
+  // No hay sesión → al login
+  if (!user) {
     return <Navigate to="/admin/login" replace />;
   }
 
+  // Hay sesión → adelante ✅
   return <>{children}</>;
 }
