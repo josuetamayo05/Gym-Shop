@@ -12,6 +12,26 @@ if (!getApps().length) {
   });
 }
 
+type ProductDoc = {
+  name?: string;
+  slug?: string;
+  category?: string;
+  productType?: string;
+  price?: number;
+  images?: string[];
+  description?: string;
+  sizes?: string[];
+  badge?: string;
+  featured?: boolean;
+  active?: boolean;
+  createdAt?: number;
+  updatedAt?: number;
+};
+
+type ProductRow = ProductDoc & {
+  id: string;
+};
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
@@ -26,14 +46,15 @@ export default async function handler(
 
     const snap = await db
       .collection("products")
-      .where("active", "==", true)
       .orderBy("updatedAt", "desc")
       .get();
 
-    const products = snap.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    }));
+    const products: ProductRow[] = snap.docs
+      .map((d) => ({
+        id: d.id,
+        ...(d.data() as ProductDoc),
+      }))
+      .filter((p) => p.active !== false);
 
     return res.status(200).json(products);
   } catch (error) {
