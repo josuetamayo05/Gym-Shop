@@ -8,7 +8,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "pullover-001",
     slug: "pulover-verano-gym",
-    name: "Pulóver Training Ligero — Hombre",
+    name: "Pulóver Training Ligeros — Hombre",
     category: "Hombre",
     productType: "Pulover",
     price: 10,
