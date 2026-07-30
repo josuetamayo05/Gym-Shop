@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 
 import { useProducts } from "../entities/product/model/useProducts";
@@ -14,14 +14,13 @@ type TypeFilter = "Todos" | Product["productType"];
 type Sort = "reco" | "price_asc" | "price_desc" | "name_asc";
 
 export function Catalog() {
-  const { products: PRODUCTS } = useProducts();
-  // Derivados (con memo para que no recalculen de más, pero se actualicen con HMR)
+  const { products: PRODUCTS, source } = useProducts();
+
   const { minBound, maxBound, sizes, productTypes } = useMemo(() => {
     const prices = PRODUCTS.map((p) => p.price);
     const minBound = prices.length ? Math.min(...prices) : 0;
     const maxBound = prices.length ? Math.max(...prices) : 0;
 
-    // tallas
     const order = ["Único", "XS", "S", "M", "L", "XL", "XXL"];
     const sizesSet = new Set<string>();
     PRODUCTS.forEach((p) => (p.sizes ?? []).forEach((s) => sizesSet.add(s)));
@@ -29,11 +28,12 @@ export function Catalog() {
     const sizes = Array.from(sizesSet).sort((a, b) => {
       const ia = order.indexOf(a);
       const ib = order.indexOf(b);
-      if (ia !== -1 || ib !== -1) return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+      if (ia !== -1 || ib !== -1) {
+        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+      }
       return a.localeCompare(b);
     });
 
-    // tipos de producto
     const typeSet = new Set<Product["productType"]>();
     PRODUCTS.forEach((p) => typeSet.add(p.productType));
     const productTypes = Array.from(typeSet).sort((a, b) => a.localeCompare(b));
@@ -41,15 +41,19 @@ export function Catalog() {
     return { minBound, maxBound, sizes, productTypes };
   }, [PRODUCTS]);
 
-  // estados UI
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("Todos");
   const [productType, setProductType] = useState<TypeFilter>("Todos");
   const [sort, setSort] = useState<Sort>("reco");
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [priceMin, setPriceMin] = useState<number>(minBound);
-  const [priceMax, setPriceMax] = useState<number>(maxBound);
+  const [priceMin, setPriceMin] = useState<number>(0);
+  const [priceMax, setPriceMax] = useState<number>(0);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    setPriceMin(minBound);
+    setPriceMax(maxBound);
+  }, [minBound, maxBound]);
 
   function toggleSize(size: string) {
     setSelectedSizes((prev) =>
@@ -75,7 +79,16 @@ export function Catalog() {
     if (selectedSizes.length > 0) n++;
     if (priceMin !== minBound || priceMax !== maxBound) n++;
     return n;
-  }, [query, category, productType, selectedSizes.length, priceMin, priceMax, minBound, maxBound]);
+  }, [
+    query,
+    category,
+    productType,
+    selectedSizes.length,
+    priceMin,
+    priceMax,
+    minBound,
+    maxBound,
+  ]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -89,13 +102,10 @@ export function Catalog() {
         (p.description?.toLowerCase().includes(q) ?? false);
 
       const matchCat = category === "Todos" || p.category === category;
-
       const matchType = productType === "Todos" || p.productType === productType;
-
       const matchSizes =
         selectedSizes.length === 0 ||
         (p.sizes ?? []).some((s) => selectedSizes.includes(s));
-
       const matchPrice = p.price >= min && p.price <= max;
 
       return matchQuery && matchCat && matchType && matchSizes && matchPrice;
@@ -108,9 +118,16 @@ export function Catalog() {
     return list;
   }, [PRODUCTS, query, category, productType, selectedSizes, priceMin, priceMax, sort]);
 
+  if (source === "loading") {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <p className="text-sm text-black/60">Cargando catálogo…</p>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
-      {/* Hero simple */}
       <section className="mb-5 rounded-[28px] border border-black/10 bg-[#F7F3EE] p-6">
         <p className="text-xs uppercase tracking-widest text-black/60">GYM STUDIO</p>
         <h1 className="mt-2 text-2xl font-semibold leading-tight">
@@ -121,7 +138,6 @@ export function Catalog() {
         </p>
       </section>
 
-      {/* Toolbar */}
       <section className="mb-5 space-y-3">
         <div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2">
           <Search className="h-4 w-4 text-black/50" />
@@ -142,7 +158,9 @@ export function Catalog() {
             Filtros {activeFiltersCount > 0 ? `(${activeFiltersCount})` : ""}
           </button>
 
-          <p className="text-xs text-black/60">{filtered.length} resultados</p>
+          <p className="text-xs text-black/60">
+            {filtered.length} resultados
+          </p>
 
           <select
             value={sort}
@@ -157,7 +175,6 @@ export function Catalog() {
         </div>
       </section>
 
-      {/* Layout */}
       <section className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-6">
         <aside className="hidden lg:block">
           <div className="sticky top-24">
@@ -192,7 +209,6 @@ export function Catalog() {
         </div>
       </section>
 
-      {/* Mobile filters drawer */}
       <MobileFiltersDrawer open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <FiltersContent
           category={category}

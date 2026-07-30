@@ -50,7 +50,7 @@ export default async function handler(
 
     const snap = await db
       .collection("products")
-      .orderBy("updatedAt", "desc")
+      .orderBy("createdAt", "asc")
       .get();
 
     const products: ProductRow[] = snap.docs
