@@ -1,8 +1,7 @@
-// api/products.ts
-import { initializeApp, getApps, cert } from "firebase-admin/app";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
-// Inicializa Firebase Admin solo una vez
 if (!getApps().length) {
   initializeApp({
     credential: cert({
@@ -13,23 +12,32 @@ if (!getApps().length) {
   });
 }
 
-export default async function handler(req: Request) {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   try {
     const db = getFirestore();
+
     const snap = await db
       .collection("products")
       .where("active", "==", true)
       .orderBy("updatedAt", "desc")
       .get();
 
-    const products = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const products = snap.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
 
-    return new Response(JSON.stringify(products), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: "Error" }), { status: 500 });
+    return res.status(200).json(products);
+  } catch (error) {
+    console.error("Error en /api/products:", error);
+    return res.status(500).json({ error: "Error al cargar productos" });
   }
 }
-
-export const config = { runtime: "edge" };
