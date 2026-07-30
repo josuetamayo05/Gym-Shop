@@ -36,6 +36,10 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  // 👇 Anti-caché
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
