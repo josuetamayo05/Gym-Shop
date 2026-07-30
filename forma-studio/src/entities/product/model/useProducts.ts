@@ -13,23 +13,31 @@ export function useProducts() {
 
     async function load() {
       try {
-        const res = await fetch("/api/products");
+        // 👇 Añade timestamp para evitar caché
+        const res = await fetch(`/api/products?t=${Date.now()}`);
 
-        if (!res.ok) throw new Error("API error");
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
 
-        const data = await res.json();
-        const list = data as Product[];
+        const data = (await res.json()) as Product[];
+
+        // 👇 Debug temporal
+        console.log("API devolvió:", data.length, "productos");
+        console.log("Primer producto:", data[0]?.name);
+        console.log("Último producto:", data[data.length - 1]?.name);
 
         if (!cancelled) {
-          if (list.length > 0) {
-            setRemoteProducts(list);
+          if (data.length > 0) {
+            setRemoteProducts(data);
             setSource("remote");
           } else {
+            console.log("API devolvió 0 productos, usando local");
             setSource("local");
           }
         }
-      } catch {
+      } catch (error) {
+        console.error("Error cargando /api/products:", error);
         if (!cancelled) {
+          setRemoteProducts(null);
           setSource("error");
         }
       }
@@ -48,6 +56,9 @@ export function useProducts() {
     }
     return LOCAL_PRODUCTS;
   }, [remoteProducts]);
+
+  // 👇 Debug temporal
+  console.log("useProducts → source:", source, "total:", products.length);
 
   return { products, source };
 }
