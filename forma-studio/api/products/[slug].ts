@@ -1,4 +1,3 @@
-// api/products/[slug].ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
@@ -33,9 +32,9 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
@@ -63,10 +62,7 @@ export default async function handler(
     const doc = snap.docs[0];
     const data = doc.data() as ProductDoc;
 
-    return res.status(200).json({
-      id: doc.id,
-      ...data,
-    });
+    return res.status(200).json({ id: doc.id, ...data });
   } catch (error) {
     console.error("Error en /api/products/[slug]:", error);
     return res.status(500).json({ error: "Error al cargar producto" });

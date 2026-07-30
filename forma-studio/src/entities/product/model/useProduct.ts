@@ -1,4 +1,3 @@
-// src/entities/product/model/useProduct.ts
 import { useEffect, useState } from "react";
 import { PRODUCTS as LOCAL_PRODUCTS } from "./products";
 import type { Product } from "./types";
@@ -14,11 +13,11 @@ export function useProduct(slug: string) {
 
     async function load() {
       try {
-        const res = await fetch(`/api/products/${slug}`);
+        const res = await fetch(`/api/products/${slug}?t=${Date.now()}`);
 
         if (res.status === 404) {
-          // Buscar en local como fallback
           const local = LOCAL_PRODUCTS.find((p) => p.slug === slug);
+
           if (!cancelled) {
             if (local) {
               setProduct(local);
@@ -38,9 +37,11 @@ export function useProduct(slug: string) {
           setProduct(data);
           setStatus("ok");
         }
-      } catch {
-        // Si la API falla, buscar en local
+      } catch (error) {
+        console.error(`Error cargando /api/products/${slug}:`, error);
+
         const local = LOCAL_PRODUCTS.find((p) => p.slug === slug);
+
         if (!cancelled) {
           if (local) {
             setProduct(local);
@@ -50,6 +51,12 @@ export function useProduct(slug: string) {
           }
         }
       }
+    }
+
+    if (!slug) {
+      setProduct(null);
+      setStatus("not-found");
+      return;
     }
 
     load();

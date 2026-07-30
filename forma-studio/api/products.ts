@@ -28,15 +28,12 @@ type ProductDoc = {
   updatedAt?: number;
 };
 
-type ProductRow = ProductDoc & {
-  id: string;
-};
+type ProductRow = ProductDoc & { id: string };
 
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  // 👇 Anti-caché
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
   res.setHeader("Pragma", "no-cache");
 
