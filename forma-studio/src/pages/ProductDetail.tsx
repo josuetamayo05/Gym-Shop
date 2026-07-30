@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { DownloadStoryButton } from "../components/DownloadStoryButton";
-import { useProducts } from "../entities/product/model/useProducts";
+import { useProduct } from "../entities/product/model/useProduct";
 import { ProductGallery } from "../components/ProductGallery";
 import { formatMoney } from "../utils/money";
 import { useCartStore } from "../store/cartStore";
@@ -18,16 +18,21 @@ function ProductDetailView({ slug }: { slug: string }) {
   const add = useCartStore((s) => s.add);
   const setCartOpen = useUIStore((s) => s.setCartOpen);
 
-  const { products } = useProducts();
-
-  const product = useMemo(
-    () => products.find((p) => p.slug === slug),
-    [products, slug]
-  );
+  const { product, status } = useProduct(slug);
 
   const [size, setSize] = useState<string>("");
 
-  if (!product) {
+  // Cargando
+  if (status === "loading") {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <p className="text-sm text-black/60">Cargando producto…</p>
+      </main>
+    );
+  }
+
+  // No encontrado
+  if (status === "not-found" || status === "error" || !product) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10">
         <button
@@ -57,14 +62,21 @@ function ProductDetailView({ slug }: { slug: string }) {
           <ChevronLeft className="h-4 w-4" />
           Volver
         </button>
-          <DownloadStoryButton product={product} />
-        <Link to="/" className="text-sm font-semibold text-black/60 hover:text-black">
+        <DownloadStoryButton product={product} />
+        <Link
+          to="/"
+          className="text-sm font-semibold text-black/60 hover:text-black"
+        >
           Catálogo
         </Link>
       </div>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <ProductGallery key={product.id} images={product.images} alt={product.name} />
+        <ProductGallery
+          key={product.id}
+          images={product.images}
+          alt={product.name}
+        />
 
         <div className="lg:pl-2">
           <p className="text-xs uppercase tracking-widest text-black/50">
@@ -80,7 +92,9 @@ function ProductDetailView({ slug }: { slug: string }) {
           </p>
 
           {product.description && (
-            <p className="mt-3 text-sm text-black/70">{product.description}</p>
+            <p className="mt-3 text-sm text-black/70">
+              {product.description}
+            </p>
           )}
 
           <div className="mt-6">

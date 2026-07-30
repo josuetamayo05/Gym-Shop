@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 
-import { useProducts } from "../entities/product/model/useProducts";
+import { useProduct } from "../entities/product/model/useProduct";
 import type { Product } from "../entities/product/model/types";
 
 import { ProductCard } from "../entities/product/ui/ProductCard";
@@ -14,7 +14,7 @@ type TypeFilter = "Todos" | Product["productType"];
 type Sort = "reco" | "price_asc" | "price_desc" | "name_asc";
 
 export function Catalog() {
-  const { products: PRODUCTS } = useProducts();
+  const { products: PRODUCTS } = useProduct();
   // Derivados (con memo para que no recalculen de más, pero se actualicen con HMR)
   const { minBound, maxBound, sizes, productTypes } = useMemo(() => {
     const prices = PRODUCTS.map((p) => p.price);

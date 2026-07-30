@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import html2canvas from "html2canvas";
 
-import { useProducts } from "../entities/product/model/useProducts";
+import {  } from "../entities/product/model/useProduct";
 import type { Product } from "../entities/product/model/types";
 import { formatMoney } from "../utils/money";
 
@@ -39,7 +39,7 @@ export function ProductShare() {
   const [params] = useSearchParams();
   const format = (params.get("format") as Format) || "post";
 
-  const { products } = useProducts();
+  const { products } = useProduct();
 
   const product = useMemo(() => {
     if (!slug) return undefined;
