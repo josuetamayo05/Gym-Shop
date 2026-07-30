@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import html2canvas from "html2canvas";
 
-import {  } from "../entities/product/model/useProduct";
+import { useProduct } from "../entities/product/model/useProduct"; // ✅
 import type { Product } from "../entities/product/model/types";
 import { formatMoney } from "../utils/money";
 
@@ -39,14 +39,18 @@ export function ProductShare() {
   const [params] = useSearchParams();
   const format = (params.get("format") as Format) || "post";
 
-  const { products } = useProduct();
+  // ✅ Ahora usa useProduct(slug) correctamente
+  const { product, status } = useProduct(slug ?? "");
 
-  const product = useMemo(() => {
-    if (!slug) return undefined;
-    return products.find((p) => p.slug === slug);
-  }, [products, slug]);
+  if (status === "loading") {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-10">
+        <p className="text-sm text-black/60">Cargando…</p>
+      </main>
+    );
+  }
 
-  if (!product) {
+  if (status === "not-found" || status === "error" || !product) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
         <p className="text-sm text-black/70">Producto no encontrado.</p>
@@ -60,7 +64,13 @@ export function ProductShare() {
   return <ProductShareView product={product} format={format} />;
 }
 
-function ProductShareView({ product: p, format }: { product: Product; format: Format }) {
+function ProductShareView({
+  product: p,
+  format,
+}: {
+  product: Product;
+  format: Format;
+}) {
   const frameRef = useRef<HTMLDivElement | null>(null);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -68,7 +78,9 @@ function ProductShareView({ product: p, format }: { product: Product; format: Fo
   const text = useMemo(() => buildFacebookText(p), [p]);
 
   const frameClass =
-    format === "story" ? "w-[360px] aspect-[9/16]" : "w-[360px] aspect-[4/5]";
+    format === "story"
+      ? "w-[360px] aspect-[9/16]"
+      : "w-[360px] aspect-[4/5]";
 
   async function handleCopy() {
     try {
@@ -98,7 +110,9 @@ function ProductShareView({ product: p, format }: { product: Product; format: Fo
       );
       if (!blob) return;
 
-      const file = new File([blob], `${p.slug}-${format}.png`, { type: "image/png" });
+      const file = new File([blob], `${p.slug}-${format}.png`, {
+        type: "image/png",
+      });
 
       const nav = navigator as Navigator & {
         share?: (data: { files?: File[]; title?: string }) => Promise<void>;
@@ -151,12 +165,10 @@ function ProductShareView({ product: p, format }: { product: Product; format: Fo
           </div>
         </div>
 
-        {/* Aquí renderiza tu frame de plantilla (usa el que ya tienes o ShareFrame) */}
         <div
           ref={frameRef}
           className={`${frameClass} mx-auto overflow-hidden rounded-[28px] bg-[#F7F3EE]`}
         >
-          {/* Si quieres que aquí sea exactamente tu plantilla 4:5, me dices y lo conectamos con ShareFrame */}
           <div className="p-4 text-black">
             <p className="text-xs uppercase tracking-widest text-black/50">
               {p.category} · {p.productType}

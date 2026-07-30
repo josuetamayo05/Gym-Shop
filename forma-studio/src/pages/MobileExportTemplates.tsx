@@ -5,7 +5,7 @@ import type { Product } from "../entities/product/model/types";
 import { formatMoney } from "../utils/money";
 import { ShareFrame } from "../components/ShareFrame";
 import { buildWhatsAppLink } from "../utils/whatsapp";
-import { useProduct } from "../entities/product/model/useProduct";
+import { useProducts } from "../entities/product/model/useProducts";
 
 const WHATSAPP = "5350121476";
 
@@ -74,7 +74,7 @@ function buildPublishText(products: Product[]) {
 
 export function MobileExportTemplates() {
   // 🔥 Firestore si hay datos, si no fallback a local
-  const { products, source } = useProduct();
+  const { products, source } = useProducts();
 
   const [mode, setMode] = useState<Mode>("publico");
 
