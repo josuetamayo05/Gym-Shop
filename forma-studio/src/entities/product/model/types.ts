@@ -14,6 +14,6 @@ export type Product = {
   sizes: string[];
   badge?: "Nuevo" | "Best seller" | "-15%";
   featured?: boolean;
-
+  soldOut?: boolean;
   active?: boolean; // <- para ocultar productos desde admin
 };

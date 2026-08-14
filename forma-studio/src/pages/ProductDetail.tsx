@@ -125,9 +125,15 @@ function ProductDetailView({ slug }: { slug: string }) {
               add(product, selectedSize);
               setCartOpen(true);
             }}
-            className="mt-6 w-full rounded-2xl bg-[#D8C3A5] px-4 py-3 text-sm font-semibold text-black"
+            disabled={product.soldOut}
+            className={
+              "mt-6 w-full rounded-2xl px-4 py-3 text-sm font-semibold " +
+              (product.soldOut
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-[#D8C3A5] text-black")
+            }
           >
-            Añadir al carrito
+            {product.soldOut ? "Agotado" : "Añadir al carrito"}
           </button>
 
           <p className="mt-2 text-xs text-black/50">

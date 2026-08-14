@@ -17,6 +17,7 @@ type ProductDoc = {
   slug: string;
   price: number;
   active: boolean;
+  soldOut: boolean;
   category: string;
   productType: string;
   updatedAt?: number;
@@ -33,7 +34,11 @@ export function AdminProducts() {
     return onSnapshot(q, (snap) => {
       const rows: ProductRow[] = snap.docs.map((d) => {
         const data = d.data() as DocumentData as ProductDoc;
-        return { id: d.id, ...data };
+        return {
+          id: d.id,
+          ...data,
+          soldOut: data.soldOut ?? false,
+        };
       });
       setItems(rows);
     });
@@ -42,6 +47,13 @@ export function AdminProducts() {
   async function toggleActive(p: ProductRow) {
     await updateDoc(doc(db, "products", p.id), {
       active: !p.active,
+      updatedAt: nowMs(),
+    });
+  }
+
+  async function toggleSoldOut(p: ProductRow) {
+    await updateDoc(doc(db, "products", p.id), {
+      soldOut: !p.soldOut,
       updatedAt: nowMs(),
     });
   }
@@ -69,11 +81,26 @@ export function AdminProducts() {
               <p className="text-xs text-black/60">
                 {p.category} · {p.productType} · ${p.price} ·{" "}
                 {p.active ? "Activo" : "Oculto"}
+                {p.soldOut && (
+                  <span className="ml-1 text-red-600">· AGOTADO</span>
+                )}
               </p>
               <p className="text-xs text-black/40">/{p.slug}</p>
             </div>
 
             <div className="flex shrink-0 gap-2">
+              <button
+                onClick={() => toggleSoldOut(p)}
+                className={
+                  "rounded-2xl border px-3 py-2 text-xs font-semibold " +
+                  (p.soldOut
+                    ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+                    : "border-black/10 hover:bg-black/5")
+                }
+              >
+                {p.soldOut ? "Reponer" : "Agotar"}
+              </button>
+
               <button
                 onClick={() => toggleActive(p)}
                 className="rounded-2xl border border-black/10 px-3 py-2 text-xs font-semibold hover:bg-black/5"

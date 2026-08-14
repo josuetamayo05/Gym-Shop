@@ -17,7 +17,11 @@ export function ProductCard({ product }: { product: Product }) {
   const add = useCartStore((s) => s.add);
   const setCartOpen = useUIStore((s) => s.setCartOpen);
 
+  const isSoldOut = product.soldOut === true;
+
   function handleQuickAdd() {
+    if (isSoldOut) return;
+
     if ((product.sizes?.length ?? 0) <= 1) {
       const size = product.sizes?.[0] ?? "Único";
       add(product, size);
@@ -38,7 +42,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <>
       <article className="group overflow-hidden rounded-3xl border border-black/10 bg-white">
-        {/* Imagen (abre QuickView) */}
+        {/* Imagen */}
         <button
           type="button"
           onClick={() => setQuickViewOpen(true)}
@@ -54,42 +58,55 @@ export function ProductCard({ product }: { product: Product }) {
               src={product.images?.[0]}
               alt={product.name}
               onLoad={() => setImgLoaded(true)}
-              className="h-full w-full object-cover transition-transform duration-300 md:group-hover:scale-[1.03]"
+              className={
+                "h-full w-full object-cover transition-transform duration-300 md:group-hover:scale-[1.03] " +
+                (isSoldOut ? "opacity-50 grayscale" : "")
+              }
               loading="lazy"
             />
 
-            {product.badge && (
+            {/* Badge Agotado */}
+            {isSoldOut && (
+              <div className="absolute left-3 top-3 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">
+                Agotado
+              </div>
+            )}
+
+            {/* Badge normal (solo si no está agotado) */}
+            {!isSoldOut && product.badge && (
               <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black backdrop-blur">
                 {product.badge}
               </div>
             )}
 
-            {/* Overlay SOLO DESKTOP */}
-            <div className="pointer-events-none absolute inset-x-3 bottom-3 hidden gap-2 opacity-0 transition md:flex md:group-hover:opacity-100">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleQuickAdd();
-                }}
-                className="pointer-events-auto flex-1 rounded-2xl bg-[#D8C3A5] px-4 py-2 text-sm font-semibold text-black"
-              >
-                Añadir
-              </button>
+            {/* Overlay SOLO DESKTOP (oculto si agotado) */}
+            {!isSoldOut && (
+              <div className="pointer-events-none absolute inset-x-3 bottom-3 hidden gap-2 opacity-0 transition md:flex md:group-hover:opacity-100">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleQuickAdd();
+                  }}
+                  className="pointer-events-auto flex-1 rounded-2xl bg-[#D8C3A5] px-4 py-2 text-sm font-semibold text-black"
+                >
+                  Añadir
+                </button>
 
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setQuickViewOpen(true);
-                }}
-                className="pointer-events-auto rounded-2xl border border-white/40 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur"
-              >
-                Ver
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setQuickViewOpen(true);
+                  }}
+                  className="pointer-events-auto rounded-2xl border border-white/40 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur"
+                >
+                  Ver
+                </button>
+              </div>
+            )}
           </div>
         </button>
 
@@ -104,16 +121,27 @@ export function ProductCard({ product }: { product: Product }) {
                 {product.category} · {product.productType}
               </p>
             </div>
-            <p className="text-sm font-semibold">{formatMoney(product.price)}</p>
+            <p className={
+              "text-sm font-semibold " +
+              (isSoldOut ? "text-black/40 line-through" : "")
+            }>
+              {formatMoney(product.price)}
+            </p>
           </div>
 
           {/* ACCIONES SOLO MÓVIL */}
           <div className="flex gap-2 md:hidden">
             <button
               onClick={handleQuickAdd}
-              className="flex-1 rounded-2xl bg-[#0B0B0C] px-4 py-2 text-sm font-semibold text-white hover:bg-black/90"
+              disabled={isSoldOut}
+              className={
+                "flex-1 rounded-2xl px-4 py-2 text-sm font-semibold " +
+                (isSoldOut
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-[#0B0B0C] text-white hover:bg-black/90")
+              }
             >
-              Añadir
+              {isSoldOut ? "Agotado" : "Añadir"}
             </button>
 
             <button

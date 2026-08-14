@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
-import { db} from "../../firebase";
+import { db } from "../../firebase";
 import { uploadCloudinaryImages } from "../uploadCloudinary";
 
 import { CATEGORIES, PRODUCT_TYPES, SIZES } from "../constants";
@@ -20,6 +20,7 @@ type ProductDoc = {
   description: string;
   sizes: string[];
   active: boolean;
+  soldOut: boolean;
   images: string[];
   createdAt?: number;
   updatedAt?: number;
@@ -35,6 +36,7 @@ function defaultState(): ProductDoc {
     description: "",
     sizes: ["Único"],
     active: true,
+    soldOut: false,
     images: [],
   };
 }
@@ -47,13 +49,19 @@ export function AdminProductEdit() {
   const [state, setState] = useState<ProductDoc>(defaultState());
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function load() {
       if (!id) return;
       const snap = await getDoc(doc(db, "products", id));
       if (!snap.exists()) return;
-      setState(snap.data() as ProductDoc);
+      const data = snap.data() as Partial<ProductDoc>;
+      setState({
+        ...defaultState(),
+        ...data,
+        soldOut: data.soldOut ?? false,
+      });
     }
     load();
   }, [id]);
@@ -72,10 +80,11 @@ export function AdminProductEdit() {
 
   async function uploadImages(productId: string) {
     return await uploadCloudinaryImages(productId, newFiles);
-    }
+  }
 
   async function handleSave() {
     setSaving(true);
+    setError("");
     try {
       const base: ProductDoc = {
         ...state,
@@ -105,6 +114,9 @@ export function AdminProductEdit() {
       }
 
       nav("/admin/products");
+    } catch (e) {
+      console.error(e);
+      setError(e instanceof Error ? e.message : "Error al guardar");
     } finally {
       setSaving(false);
     }
@@ -123,7 +135,11 @@ export function AdminProductEdit() {
           value={state.name}
           onChange={(e) => {
             const name = e.target.value;
-            setState((p) => ({ ...p, name, slug: p.slug ? p.slug : slugify(name) }));
+            setState((p) => ({
+              ...p,
+              name,
+              slug: p.slug ? p.slug : slugify(name),
+            }));
           }}
         />
 
@@ -131,27 +147,43 @@ export function AdminProductEdit() {
           className="w-full rounded-2xl border border-black/10 px-3 py-2 text-sm outline-none"
           placeholder="Slug (url)"
           value={state.slug}
-          onChange={(e) => setState((p) => ({ ...p, slug: slugify(e.target.value) }))}
+          onChange={(e) =>
+            setState((p) => ({ ...p, slug: slugify(e.target.value) }))
+          }
         />
 
         <div className="grid grid-cols-2 gap-2">
           <select
             className="w-full rounded-2xl border border-black/10 px-3 py-2 text-sm outline-none"
             value={state.category}
-            onChange={(e) => setState((p) => ({ ...p, category: e.target.value as Category }))}
+            onChange={(e) =>
+              setState((p) => ({
+                ...p,
+                category: e.target.value as Category,
+              }))
+            }
           >
             {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
           </select>
 
           <select
             className="w-full rounded-2xl border border-black/10 px-3 py-2 text-sm outline-none"
             value={state.productType}
-            onChange={(e) => setState((p) => ({ ...p, productType: e.target.value as ProductType }))}
+            onChange={(e) =>
+              setState((p) => ({
+                ...p,
+                productType: e.target.value as ProductType,
+              }))
+            }
           >
             {PRODUCT_TYPES.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
         </div>
@@ -161,14 +193,18 @@ export function AdminProductEdit() {
           placeholder="Precio (USD)"
           type="number"
           value={state.price}
-          onChange={(e) => setState((p) => ({ ...p, price: Number(e.target.value) }))}
+          onChange={(e) =>
+            setState((p) => ({ ...p, price: Number(e.target.value) }))
+          }
         />
 
         <textarea
           className="min-h-24 w-full rounded-2xl border border-black/10 px-3 py-2 text-sm outline-none"
           placeholder="Descripción"
           value={state.description}
-          onChange={(e) => setState((p) => ({ ...p, description: e.target.value }))}
+          onChange={(e) =>
+            setState((p) => ({ ...p, description: e.target.value }))
+          }
         />
 
         <div>
@@ -195,14 +231,30 @@ export function AdminProductEdit() {
           </div>
         </div>
 
-        <label className="inline-flex items-center gap-2 text-sm font-semibold">
-          <input
-            type="checkbox"
-            checked={state.active}
-            onChange={(e) => setState((p) => ({ ...p, active: e.target.checked }))}
-          />
-          Activo (visible en catálogo)
-        </label>
+        {/* ── Checkboxes ── */}
+        <div className="flex flex-col gap-2">
+          <label className="inline-flex items-center gap-2 text-sm font-semibold">
+            <input
+              type="checkbox"
+              checked={state.active}
+              onChange={(e) =>
+                setState((p) => ({ ...p, active: e.target.checked }))
+              }
+            />
+            Activo (visible en catálogo)
+          </label>
+
+          <label className="inline-flex items-center gap-2 text-sm font-semibold">
+            <input
+              type="checkbox"
+              checked={state.soldOut}
+              onChange={(e) =>
+                setState((p) => ({ ...p, soldOut: e.target.checked }))
+              }
+            />
+            <span className="text-red-600">Agotado</span>
+          </label>
+        </div>
 
         <div>
           <p className="text-sm font-semibold">Subir fotos (galería del móvil)</p>
@@ -214,6 +266,12 @@ export function AdminProductEdit() {
             className="mt-2 w-full text-sm"
           />
         </div>
+
+        {error && (
+          <p className="rounded-2xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-600">
+            {error}
+          </p>
+        )}
 
         <button
           onClick={handleSave}
