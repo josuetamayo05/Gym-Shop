@@ -120,48 +120,48 @@ export function Catalog() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
-      {/* HERO BANNER — ESTILO EXACTO A LA FOTO DE GEMINI */}
-        <section className="relative mb-6 overflow-hidden rounded-[28px] border border-black/5 bg-[#F5F1EA] shadow-sm md:rounded-[36px]">
-          <div className="relative aspect-[16/9] w-full min-h-[260px] sm:min-h-[320px] md:min-h-[380px]">
-            {/* Imagen panorámica de fondo */}
-            <img
-              src="/hero-js-concept.jpg"
-              alt="JS CONCEPT"
-              className="absolute inset-0 h-full w-full object-cover object-right sm:object-center"
-            />
+      {/* HERO BANNER — OPTIMIZADO PARA MÓVIL Y DESKTOP */}
+      <section className="relative mb-6 overflow-hidden rounded-[28px] border border-black/5 bg-[#F5F1EA] shadow-sm md:rounded-[36px]">
+        <div className="relative flex min-h-[290px] w-full flex-col justify-center p-5 sm:aspect-[16/9] sm:min-h-[340px] sm:p-8 md:p-12">
+          {/* Imagen de fondo */}
+          <img
+            src="/hero-js-concept.jpg"
+            alt="JS CONCEPT"
+            className="absolute inset-0 h-full w-full object-cover object-right sm:object-center"
+          />
 
-            {/* Fondo degradado suave a la izquierda para máxima legibilidad del texto */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#F5F1EA] via-[#F5F1EA]/90 to-transparent via-60%" />
+          {/* Degradado suave para asegurar lectura sin tapar los productos de la derecha */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#F5F1EA] via-[#F5F1EA]/95 to-transparent via-75% sm:via-60%" />
 
-            {/* Contenido */}
-            <div className="relative z-10 flex h-full max-w-[75%] flex-col justify-center p-5 sm:max-w-[60%] sm:p-8 md:p-12">
-              {/* TÍTULO GRANDE (Idéntico al mockup) */}
-              <h1 className="text-2xl font-bold tracking-tight text-black leading-[1.1] sm:text-4xl md:text-5xl lg:text-6xl">
-                JS CONCEPT — <br />
-                <span className="block mt-0.5">Tu Selección de Vida</span>
-              </h1>
+          {/* Contenido con jerarquía corregida */}
+          <div className="relative z-10 max-w-[88%] sm:max-w-[62%] md:max-w-[55%]">
+            {/* 1. TÍTULO PRINCIPAL (Bien arriba y visible) */}
+            <h1 className="text-xl font-bold tracking-tight text-black leading-tight sm:text-3xl md:text-5xl lg:text-6xl">
+              JS CONCEPT — <br />
+              <span className="block mt-0.5">Tu Selección de Vida</span>
+            </h1>
 
-              {/* SUBTÍTULO EXACTO */}
-              <p className="mt-2 text-xs leading-relaxed text-black/75 sm:mt-4 sm:text-sm md:text-base lg:text-lg max-w-md">
-                Explora nuestra cuidada selección de moda casual, tecnología de vanguardia,
-                y esenciales para tu día a día. Calidad curada para elevar tu estilo personal.
-              </p>
+            {/* 2. PÁRRAFO (Más abajo con espacio respirable) */}
+            <p className="mt-3 text-[11px] leading-relaxed text-black/75 sm:mt-4 sm:text-sm md:text-base lg:text-lg">
+              Explora nuestra cuidada selección de moda casual, tecnología de vanguardia,
+              y esenciales para tu día a día. Calidad curada para elevar tu estilo personal.
+            </p>
 
-              {/* BOTÓN OLIVA */}
-              <div className="mt-4 sm:mt-6">
-                <button
-                  onClick={() => {
-                    const el = document.getElementById("catalog-products");
-                    el?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="inline-flex items-center rounded-full bg-[#394432] px-5 py-2.5 sm:px-7 sm:py-3.5 text-xs sm:text-sm font-semibold tracking-wide text-white shadow-sm transition hover:bg-[#2A3325] active:scale-95"
-                >
-                  Explorar la Colección
-                </button>
-              </div>
+            {/* 3. BOTÓN OLIVA (Al final) */}
+            <div className="mt-4 sm:mt-6">
+              <button
+                onClick={() => {
+                  const el = document.getElementById("catalog-products");
+                  el?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="inline-flex items-center rounded-full bg-[#394432] px-5 py-2.5 sm:px-7 sm:py-3.5 text-xs sm:text-sm font-semibold tracking-wide text-white shadow-sm transition hover:bg-[#2A3325] active:scale-95"
+              >
+                Explorar la Colección
+              </button>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
       <section className="mb-5 space-y-3">
         {/* Buscador */}
