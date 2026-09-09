@@ -120,41 +120,43 @@ export function Catalog() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
-      {/* HERO BANNER - FORMATO PANORÁMICO YOUTUBE (16:9) */}
-      <section className="relative mb-6 overflow-hidden rounded-[24px] border border-black/5 bg-[#F5F1EA] shadow-sm sm:rounded-[32px]">
-        {/* Contenedor 16:9 exacto como YouTube */}
-        <div className="relative aspect-[16/9] w-full sm:aspect-[2/1] md:aspect-[2.2/1]">
-          {/* Imagen panorámica completa */}
+      {/* HERO BANNER — ESTILO EXACTO A LA FOTO DE GEMINI */}
+      <section className="relative mb-6 overflow-hidden rounded-[28px] border border-black/5 bg-[#F5F1EA] shadow-sm md:rounded-[36px]">
+        <div className="relative aspect-[16/9] w-full min-h-[260px] sm:min-h-[320px] md:min-h-[380px]">
+          {/* Imagen panorámica de fondo */}
           <img
             src="/hero-js-concept.jpg"
-            alt="JS CONCEPT — Tu Selección de Vida"
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            alt="JS CONCEPT"
+            className="absolute inset-0 h-full w-full object-cover object-right sm:object-center"
           />
 
-          {/* Sombra suave solo a la izquierda para leer el texto sin tapar la foto derecha */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#F5F1EA] via-[#F5F1EA]/80 to-transparent" />
+          {/* Fondo degradado suave a la izquierda para máxima legibilidad del texto */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#F5F1EA] via-[#F5F1EA]/90 to-transparent via-60%" />
 
-          {/* Texto e información en el lado izquierdo */}
-          <div className="relative z-10 flex h-full flex-col justify-center p-4 sm:p-8 md:p-12 max-w-[65%] sm:max-w-[55%]">
-            <h1 className="text-base font-bold tracking-tight text-black sm:text-2xl md:text-4xl leading-tight">
+          {/* Contenido */}
+          <div className="relative z-10 flex h-full max-w-[75%] flex-col justify-center p-5 sm:max-w-[60%] sm:p-8 md:p-12">
+            {/* TÍTULO GRANDE (Idéntico al mockup) */}
+            <h1 className="text-2xl font-bold tracking-tight text-black leading-[1.1] sm:text-4xl md:text-5xl lg:text-6xl">
               JS CONCEPT — <br />
-              <span className="font-semibold text-black/90">Tu Selección de Vida</span>
+              <span className="block mt-0.5">Tu Selección de Vida</span>
             </h1>
 
-            <p className="mt-1 sm:mt-3 text-[11px] sm:text-sm md:text-base leading-relaxed text-black/70 line-clamp-2 sm:line-clamp-none">
-              Explora nuestra cuidada selección de moda casual, tecnología de vanguardia
-              y esenciales para tu día a día.
+            {/* SUBTÍTULO EXACTO */}
+            <p className="mt-2 text-xs leading-relaxed text-black/75 sm:mt-4 sm:text-sm md:text-base lg:text-lg max-w-md">
+              Explora nuestra cuidada selección de moda casual, tecnología de vanguardia,
+              y esenciales para tu día a día. Calidad curada para elevar tu estilo personal.
             </p>
 
-            <div className="mt-2 sm:mt-5">
+            {/* BOTÓN OLIVA */}
+            <div className="mt-4 sm:mt-6">
               <button
                 onClick={() => {
                   const el = document.getElementById("catalog-products");
                   el?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="inline-flex items-center rounded-full bg-[#374231] px-3.5 py-1.5 sm:px-6 sm:py-3 text-[10px] sm:text-xs font-semibold tracking-wide text-white transition hover:bg-[#2A3325]"
+                className="inline-flex items-center rounded-full bg-[#394432] px-5 py-2.5 sm:px-7 sm:py-3.5 text-xs sm:text-sm font-semibold tracking-wide text-white shadow-sm transition hover:bg-[#2A3325] active:scale-95"
               >
-                Explorar Colección
+                Explorar la Colección
               </button>
             </div>
           </div>
