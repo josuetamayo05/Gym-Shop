@@ -15,7 +15,7 @@ function waitNextPaint() {
 
 function buildSimpleText(products: Product[]) {
   const lines: string[] = [];
-  lines.push("GYM STUDIO");
+  lines.push("JS CONCEPT");
   lines.push(`WhatsApp: +${WHATSAPP}`);
   lines.push("");
   lines.push("Productos:");
@@ -142,7 +142,7 @@ export function MobileCollages() {
     try {
       await nav.share({
         files,
-        title: "GYM STUDIO - Plantillas",
+        title: "JS CONCEPT - Plantillas",
         text: `Lote ${batchIndex + 1}/${totalBatches}`,
       });
       // El usuario elige “Guardar imágenes”

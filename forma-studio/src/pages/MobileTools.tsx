@@ -25,7 +25,7 @@ async function fetchAsFile(url: string, filename: string) {
 
 function buildFacebookList(products: Product[]) {
   const lines: string[] = [];
-  lines.push("GYM STUDIO");
+  lines.push("JS CONCEPT");
   lines.push(`WhatsApp: +${WHATSAPP}`);
   lines.push("");
   lines.push("Productos:");
@@ -115,7 +115,7 @@ export function MobileTools() {
     try {
       await nav.share({
         files: prepared.files,
-        title: "GYM STUDIO - Fotos",
+        title: "JS CONCEPT - Fotos",
         text: prepared.label,
       });
     } catch {

@@ -52,7 +52,7 @@ export function DownloadStoryButton({ product }: { product: Product }) {
 
       if (typeof nav.share === "function" && typeof nav.canShare === "function") {
         if (nav.canShare({ files: [file] })) {
-          await nav.share({ files: [file], title: "GYM STUDIO" });
+          await nav.share({ files: [file], title: "JS CONCEPT" });
           return;
         }
       }

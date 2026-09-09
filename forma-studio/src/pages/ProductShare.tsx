@@ -12,7 +12,7 @@ const WHATSAPP = (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) ?? 
 function buildFacebookText(p: Product) {
   const sizesText = p.sizes?.length ? p.sizes.join(", ") : "Consultar";
   return [
-    "GYM STUDIO",
+    "JS CONCEPT",
     `${p.category} · ${p.productType}`,
     p.name,
     `Precio: ${formatMoney(p.price)}`,
@@ -120,7 +120,7 @@ function ProductShareView({
       };
 
       if (nav.share && nav.canShare && nav.canShare({ files: [file] })) {
-        await nav.share({ files: [file], title: "GYM STUDIO" });
+        await nav.share({ files: [file], title: "JS CONCEPT" });
         return;
       }
 

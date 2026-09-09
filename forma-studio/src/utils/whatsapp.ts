@@ -25,7 +25,7 @@ export function buildWhatsAppMessagePro(items: CartItem[], opts?: { note?: strin
   }).format(new Date());
 
   const lines: string[] = [];
-  lines.push(`*GYM STUDIO* — Pedido`);
+  lines.push(`*JS CONCEPT* — Pedido`);
   lines.push(`ID: *${orderId}*`);
   lines.push(`Fecha: ${dateStr}`);
   lines.push("");

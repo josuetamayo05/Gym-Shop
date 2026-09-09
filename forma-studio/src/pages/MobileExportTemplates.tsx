@@ -55,7 +55,7 @@ function buildPublishText(products: Product[]) {
   const waLink = WHATSAPP ? buildWhatsAppLink(WHATSAPP, preset) : "";
 
   const lines: string[] = [];
-  lines.push("GYM STUDIO");
+  lines.push("JS CONCEPT");
   lines.push("");
   lines.push("Productos:");
 
@@ -179,7 +179,7 @@ export function MobileExportTemplates() {
     try {
       await nav.share({
         files,
-        title: "GYM STUDIO - Plantillas",
+        title: "JS CONCEPT - Plantillas",
         text:
           mode === "publico"
             ? `Lote ${batchIndex + 1}/${totalBatches} — Público (con precio)`

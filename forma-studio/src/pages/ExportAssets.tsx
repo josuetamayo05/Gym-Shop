@@ -36,7 +36,7 @@ function basename(path: string) {
 function buildSimpleFacebookText(p: Product) {
   const sizes = p.sizes?.length ? p.sizes.join(", ") : "Consultar";
   return [
-    `GYM STUDIO`,
+    `JS CONCEPT`,
     `${p.category} · ${p.productType}`,
     `${p.name}`,
     `Precio: ${formatMoney(p.price)}`,
