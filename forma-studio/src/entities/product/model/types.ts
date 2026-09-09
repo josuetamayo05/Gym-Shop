@@ -12,6 +12,7 @@ export type Category =
 export type ProductType =
   | "Camisetas"
   | "Pantalones"
+  | "Licras"
   | "Calzado"
   | "Audio & Tech"
   | "Gadgets"

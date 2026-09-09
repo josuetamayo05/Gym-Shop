@@ -41,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <>
-      <article className="group overflow-hidden rounded-3xl border border-black/10 bg-white">
+      <article className="group overflow-hidden rounded-[24px] border border-black/8 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         {/* Imagen */}
         <button
           type="button"
@@ -49,7 +49,7 @@ export function ProductCard({ product }: { product: Product }) {
           className="relative block w-full text-left"
           aria-label="Abrir vista rápida"
         >
-          <div className="relative aspect-[4/5] overflow-hidden bg-black/5">
+          <div className="relative aspect-[4/5] overflow-hidden bg-[#F7F4EE]">
             {!imgLoaded && (
               <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-black/5 via-black/10 to-black/5" />
             )}
@@ -65,79 +65,48 @@ export function ProductCard({ product }: { product: Product }) {
               loading="lazy"
             />
 
-            {/* Badge Agotado */}
             {isSoldOut && (
-              <div className="absolute left-3 top-3 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">
+              <div className="absolute left-3 top-3 rounded-full bg-red-600 px-3 py-1 text-[11px] font-semibold text-white">
                 Agotado
               </div>
             )}
 
-            {/* Badge normal (solo si no está agotado) */}
             {!isSoldOut && product.badge && (
-              <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-black backdrop-blur">
+              <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold text-black backdrop-blur">
                 {product.badge}
-              </div>
-            )}
-
-            {/* Overlay SOLO DESKTOP (oculto si agotado) */}
-            {!isSoldOut && (
-              <div className="pointer-events-none absolute inset-x-3 bottom-3 hidden gap-2 opacity-0 transition md:flex md:group-hover:opacity-100">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleQuickAdd();
-                  }}
-                  className="pointer-events-auto flex-1 rounded-2xl bg-[#D8C3A5] px-4 py-2 text-sm font-semibold text-black"
-                >
-                  Añadir
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setQuickViewOpen(true);
-                  }}
-                  className="pointer-events-auto rounded-2xl border border-white/40 bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur"
-                >
-                  Ver
-                </button>
               </div>
             )}
           </div>
         </button>
 
-        {/* Info + acciones */}
-        <div className="space-y-2 p-4">
+        {/* Info estilo mockup */}
+        <div className="space-y-3 p-3.5 sm:p-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h3 className="truncate text-sm font-semibold leading-tight">
+            <div className="min-w-0 flex-1">
+              <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-black sm:text-sm">
                 {product.name}
               </h3>
-              <p className="mt-1 text-xs text-black/60">
-                {product.category} · {product.productType}
-              </p>
             </div>
-            <p className={
-              "text-sm font-semibold " +
-              (isSoldOut ? "text-black/40 line-through" : "")
-            }>
+
+            <p
+              className={
+                "shrink-0 text-[13px] font-semibold sm:text-sm " +
+                (isSoldOut ? "text-black/35 line-through" : "text-black")
+              }
+            >
               {formatMoney(product.price)}
             </p>
           </div>
 
-          {/* ACCIONES SOLO MÓVIL */}
+          {/* Acciones móvil */}
           <div className="flex gap-2 md:hidden">
             <button
               onClick={handleQuickAdd}
               disabled={isSoldOut}
               className={
-                "flex-1 rounded-2xl px-4 py-2 text-sm font-semibold " +
+                "flex-1 rounded-2xl px-3 py-2 text-xs font-semibold " +
                 (isSoldOut
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  ? "cursor-not-allowed bg-gray-200 text-gray-500"
                   : "bg-[#0B0B0C] text-white hover:bg-black/90")
               }
             >
@@ -146,7 +115,7 @@ export function ProductCard({ product }: { product: Product }) {
 
             <button
               onClick={() => setQuickViewOpen(true)}
-              className="flex-1 rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5"
+              className="flex-1 rounded-2xl border border-black/10 bg-white px-3 py-2 text-xs font-semibold hover:bg-black/5"
             >
               Ver
             </button>
@@ -161,13 +130,28 @@ export function ProductCard({ product }: { product: Product }) {
             </button>
           </div>
 
-          {/* Link visible en desktop */}
-          <Link
-            to={`/producto/${product.slug}`}
-            className="hidden w-full rounded-2xl border border-black/10 bg-white px-4 py-2 text-center text-sm font-semibold hover:bg-black/5 md:block"
-          >
-            Ver detalle
-          </Link>
+          {/* Desktop */}
+          <div className="hidden gap-2 md:flex">
+            <button
+              onClick={handleQuickAdd}
+              disabled={isSoldOut}
+              className={
+                "flex-1 rounded-2xl px-3 py-2 text-xs font-semibold " +
+                (isSoldOut
+                  ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                  : "bg-[#D8C3A5] text-black hover:brightness-95")
+              }
+            >
+              {isSoldOut ? "Agotado" : "Añadir"}
+            </button>
+
+            <Link
+              to={`/producto/${product.slug}`}
+              className="flex-1 rounded-2xl border border-black/10 bg-white px-3 py-2 text-center text-xs font-semibold hover:bg-black/5"
+            >
+              Ver detalle
+            </Link>
+          </div>
         </div>
       </article>
 

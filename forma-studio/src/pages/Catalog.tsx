@@ -120,32 +120,51 @@ export function Catalog() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
-      {/* HERO BANNER ESTILO JS CONCEPT */}
-      <section className="mb-6 rounded-[32px] border border-black/5 bg-[#F5F1EA] p-6 md:p-10">
-        <h1 className="text-2xl font-bold tracking-tight text-black md:text-4xl">
-          JS CONCEPT — <br className="sm:hidden" />
-          Tu Selección de Vida
-        </h1>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-black/70 md:text-base">
-          Explora nuestra cuidada selección de moda casual, tecnología de vanguardia,
-          y esenciales para tu día a día. Calidad curada para elevar tu estilo personal.
-        </p>
+      {/* HERO BANNER - FORMATO PANORÁMICO YOUTUBE (16:9) */}
+      <section className="relative mb-6 overflow-hidden rounded-[24px] border border-black/5 bg-[#F5F1EA] shadow-sm sm:rounded-[32px]">
+        {/* Contenedor 16:9 exacto como YouTube */}
+        <div className="relative aspect-[16/9] w-full sm:aspect-[2/1] md:aspect-[2.2/1]">
+          {/* Imagen panorámica completa */}
+          <img
+            src="/hero-js-concept.jpg"
+            alt="JS CONCEPT — Tu Selección de Vida"
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
 
-        <button
-          onClick={() => {
-            const el = document.getElementById("catalog-products");
-            el?.scrollIntoView({ behavior: "smooth" });
-          }}
-          className="mt-5 inline-flex items-center rounded-full bg-[#374231] px-6 py-3 text-xs font-semibold tracking-wide text-white transition hover:bg-[#2A3325]"
-        >
-          Explorar la Colección
-        </button>
+          {/* Sombra suave solo a la izquierda para leer el texto sin tapar la foto derecha */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#F5F1EA] via-[#F5F1EA]/80 to-transparent" />
+
+          {/* Texto e información en el lado izquierdo */}
+          <div className="relative z-10 flex h-full flex-col justify-center p-4 sm:p-8 md:p-12 max-w-[65%] sm:max-w-[55%]">
+            <h1 className="text-base font-bold tracking-tight text-black sm:text-2xl md:text-4xl leading-tight">
+              JS CONCEPT — <br />
+              <span className="font-semibold text-black/90">Tu Selección de Vida</span>
+            </h1>
+
+            <p className="mt-1 sm:mt-3 text-[11px] sm:text-sm md:text-base leading-relaxed text-black/70 line-clamp-2 sm:line-clamp-none">
+              Explora nuestra cuidada selección de moda casual, tecnología de vanguardia
+              y esenciales para tu día a día.
+            </p>
+
+            <div className="mt-2 sm:mt-5">
+              <button
+                onClick={() => {
+                  const el = document.getElementById("catalog-products");
+                  el?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="inline-flex items-center rounded-full bg-[#374231] px-3.5 py-1.5 sm:px-6 sm:py-3 text-[10px] sm:text-xs font-semibold tracking-wide text-white transition hover:bg-[#2A3325]"
+              >
+                Explorar Colección
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
 
-      {/* BUSCADOR */}
       <section className="mb-5 space-y-3">
+        {/* Buscador */}
         <div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-3 shadow-sm">
-          <Search className="h-4 w-4 text-black/40" />
+          <Search className="h-4 w-4 shrink-0 text-black/40" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -154,29 +173,29 @@ export function Catalog() {
           />
         </div>
 
-        {/* TOOLBAR */}
-        <div className="flex items-center justify-between gap-3">
+        {/* Toolbar */}
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setMobileFiltersOpen(true)}
-            className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5 lg:hidden"
+            className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2 text-xs font-semibold hover:bg-black/5 lg:hidden"
           >
             <SlidersHorizontal className="h-4 w-4" />
-            FILTROS {activeFiltersCount > 0 ? `(${activeFiltersCount})` : ""}
+            Filtros {activeFiltersCount > 0 ? `(${activeFiltersCount})` : ""}
           </button>
 
-          <p className="text-xs font-medium text-black/60">
+          <p className="min-w-0 flex-1 text-xs font-medium text-black/60">
             {filtered.length} resultados
           </p>
 
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as Sort)}
-            className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-xs font-semibold outline-none"
+            className="max-w-[150px] shrink-0 rounded-2xl border border-black/10 bg-white px-2.5 py-2 text-[11px] font-semibold outline-none sm:max-w-[180px] sm:px-3 sm:text-xs"
           >
-            <option value="reco">ORDENAR POR: Recomendados</option>
-            <option value="price_asc">Precio: menor a mayor</option>
-            <option value="price_desc">Precio: mayor a menor</option>
-            <option value="name_asc">Nombre: A-Z</option>
+            <option value="reco">Recomendados</option>
+            <option value="price_asc">Precio ↑</option>
+            <option value="price_desc">Precio ↓</option>
+            <option value="name_asc">Nombre A-Z</option>
           </select>
         </div>
       </section>

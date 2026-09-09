@@ -13,6 +13,7 @@ export const CATEGORIES = [
 export const PRODUCT_TYPES = [
   "Camisetas",
   "Pantalones",
+  "Licras",
   "Calzado",
   "Audio & Tech",
   "Gadgets",
