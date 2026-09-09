@@ -31,7 +31,7 @@ function defaultState(): ProductDoc {
     name: "",
     slug: "",
     category: "Hombre",
-    productType: "Pulover",
+    productType: "Camisetas", // ✅ Corregido (antes era "Pulover")
     price: 0,
     description: "",
     sizes: ["Único"],
@@ -231,7 +231,7 @@ export function AdminProductEdit() {
           </div>
         </div>
 
-        {/* ── Checkboxes ── */}
+        {/* Checkboxes */}
         <div className="flex flex-col gap-2">
           <label className="inline-flex items-center gap-2 text-sm font-semibold">
             <input
