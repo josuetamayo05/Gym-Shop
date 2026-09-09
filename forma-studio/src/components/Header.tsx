@@ -1,5 +1,5 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { useCartStore } from "../store/cartStore";
 import { useUIStore } from "../store/uiStore";
 
@@ -56,10 +56,7 @@ export function Header() {
           className="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-black/5"
           aria-label="Abrir carrito"
         >
-          <ShoppingBag
-            className="h-[22px] w-[22px] text-black"
-            strokeWidth={1.6}
-          />
+          <ShoppingCart className="h-[22px] w-[22px] text-black" strokeWidth={1.6} />
           {count > 0 && (
             <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#384232] px-1 text-[10px] font-bold leading-none text-white">
               {count > 99 ? "99+" : count}
