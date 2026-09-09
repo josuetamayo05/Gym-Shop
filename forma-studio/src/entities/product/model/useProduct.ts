@@ -4,44 +4,63 @@ import type { Product } from "./types";
 
 type Status = "loading" | "ok" | "not-found" | "error";
 
-export function useProduct(slug: string) {
+export function useProduct(rawSlug: string) {
   const [product, setProduct] = useState<Product | null>(null);
   const [status, setStatus] = useState<Status>("loading");
+
+  // Decodificar el slug por si trae caracteres especiales o espacios
+  const slug = decodeURIComponent(rawSlug || "").trim();
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
+      if (!slug) {
+        setStatus("not-found");
+        return;
+      }
+
       try {
-        const res = await fetch(`/api/products/${slug}?t=${Date.now()}`);
+        // 1. Intentar cargar desde el endpoint individual
+        const res = await fetch(`/api/products/${encodeURIComponent(slug)}?t=${Date.now()}`);
 
-        if (res.status === 404) {
-          const local = LOCAL_PRODUCTS.find((p) => p.slug === slug);
-
-          if (!cancelled) {
-            if (local) {
-              setProduct(local);
-              setStatus("ok");
-            } else {
-              setStatus("not-found");
-            }
+        if (res.ok) {
+          const data = (await res.json()) as Product;
+          if (data && data.name && !cancelled) {
+            setProduct(data);
+            setStatus("ok");
+            return;
           }
-          return;
         }
 
-        if (!res.ok) throw new Error("API error");
+        // 2. Si falla o da 404, buscar en la lista completa /api/products (que sabemos que funciona 100%)
+        const listRes = await fetch(`/api/products?t=${Date.now()}`);
+        if (listRes.ok) {
+          const list = (await listRes.json()) as Product[];
+          const found = list.find((p) => p.slug === slug || p.id === slug);
 
-        const data = (await res.json()) as Product;
+          if (found && !cancelled) {
+            setProduct(found);
+            setStatus("ok");
+            return;
+          }
+        }
 
+        // 3. Fallback a productos locales
+        const local = LOCAL_PRODUCTS.find((p) => p.slug === slug || p.id === slug);
         if (!cancelled) {
-          setProduct(data);
-          setStatus("ok");
+          if (local) {
+            setProduct(local);
+            setStatus("ok");
+          } else {
+            setStatus("not-found");
+          }
         }
       } catch (error) {
-        console.error(`Error cargando /api/products/${slug}:`, error);
+        console.error(`Error buscando producto [${slug}]:`, error);
 
-        const local = LOCAL_PRODUCTS.find((p) => p.slug === slug);
-
+        // Fallback en caso de error de red
+        const local = LOCAL_PRODUCTS.find((p) => p.slug === slug || p.id === slug);
         if (!cancelled) {
           if (local) {
             setProduct(local);
@@ -51,12 +70,6 @@ export function useProduct(slug: string) {
           }
         }
       }
-    }
-
-    if (!slug) {
-      setProduct(null);
-      setStatus("not-found");
-      return;
     }
 
     load();
