@@ -31,7 +31,7 @@ function defaultState(): ProductDoc {
     name: "",
     slug: "",
     category: "Hombre",
-    productType: "Camisetas", // ✅ Corregido (antes era "Pulover")
+    productType: "Camisetas",
     price: 0,
     description: "",
     sizes: ["Único"],
@@ -210,7 +210,7 @@ export function AdminProductEdit() {
         <div>
           <p className="text-sm font-semibold">Tallas (fijas)</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {SIZES.map((s) => {
+            {SIZES.map((s: string) => {
               const active = sizeSet.has(s);
               return (
                 <button
@@ -231,7 +231,6 @@ export function AdminProductEdit() {
           </div>
         </div>
 
-        {/* Checkboxes */}
         <div className="flex flex-col gap-2">
           <label className="inline-flex items-center gap-2 text-sm font-semibold">
             <input

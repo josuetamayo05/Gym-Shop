@@ -1,17 +1,22 @@
-export type Category = 
-  | "Hombre" 
-  | "Mujer" 
-  | "Tecnología" 
-  | "Suplementos" 
-  | "Accesorios" 
+export type Category =
+  | "Hombre"
+  | "Mujer"
+  | "Tecnología"
+  | "Electrodomésticos"
+  | "Hogar"
+  | "Calzado"
+  | "Suplementos"
+  | "Accesorios"
   | "Tendencias";
 
-export type ProductType = 
+export type ProductType =
   | "Camisetas"
   | "Pantalones"
   | "Calzado"
   | "Audio & Tech"
   | "Gadgets"
+  | "Electrodomésticos"
+  | "Hogar & Cocina"
   | "Suplementos"
   | "Accesorios"
   | "Otro";

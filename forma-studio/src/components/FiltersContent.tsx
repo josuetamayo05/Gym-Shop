@@ -45,11 +45,23 @@ export function FiltersContent({
 
   onClear: () => void;
 }) {
-  const categories: CategoryFilter[] = ["Todos", "Hombre", "Mujer", "Accesorios"];
+  const categories: CategoryFilter[] = [
+    "Todos",
+    "Tecnología",
+    "Electrodomésticos",
+    "Hombre",
+    "Mujer",
+    "Calzado",
+    "Hogar",
+    "Suplementos",
+    "Accesorios",
+    "Tendencias",
+  ];
 
   return (
     <div className="space-y-3">
-      <AccordionSection title="Categoría" defaultOpen>
+      {/* Categoría */}
+      <AccordionSection title="Categorías" defaultOpen>
         <div className="flex flex-wrap gap-2">
           {categories.map((c) => {
             const active = c === category;
@@ -58,10 +70,10 @@ export function FiltersContent({
                 key={c}
                 onClick={() => onCategoryChange(c)}
                 className={
-                  "rounded-2xl border px-4 py-2 text-sm font-semibold transition " +
+                  "rounded-2xl border px-3.5 py-1.5 text-xs font-semibold transition " +
                   (active
                     ? "border-black bg-black text-white"
-                    : "border-black/10 bg-white hover:bg-black/5")
+                    : "border-black/10 bg-white hover:bg-black/5 text-black/80")
                 }
               >
                 {c}
@@ -71,6 +83,7 @@ export function FiltersContent({
         </div>
       </AccordionSection>
 
+      {/* Tipo de producto */}
       <AccordionSection title="Tipo de producto" defaultOpen>
         <div className="flex flex-wrap gap-2">
           <Chip active={productType === "Todos"} onClick={() => onProductTypeChange("Todos")}>
@@ -85,36 +98,40 @@ export function FiltersContent({
         </div>
       </AccordionSection>
 
-      <AccordionSection title="Tallas" defaultOpen>
-        <div className="grid grid-cols-2 gap-2">
-          {sizes.map((s) => {
-            const checked = selectedSizes.includes(s);
-            return (
-              <label
-                key={s}
-                className={
-                  "flex cursor-pointer items-center justify-center rounded-2xl border px-3 py-2 text-sm font-semibold transition " +
-                  (checked
-                    ? "border-black bg-black text-white"
-                    : "border-black/10 bg-white hover:bg-black/5")
-                }
-              >
-                <input
-                  type="checkbox"
-                  className="hidden"
-                  checked={checked}
-                  onChange={() => onToggleSize(s)}
-                />
-                {s}
-              </label>
-            );
-          })}
-        </div>
-        <p className="mt-3 text-xs text-black/50">
-          Si no seleccionas talla, se muestran todas.
-        </p>
-      </AccordionSection>
+      {/* Tallas (solo si existen disponibles en los productos actuales) */}
+      {sizes.length > 0 && (
+        <AccordionSection title="Tallas" defaultOpen={false}>
+          <div className="grid grid-cols-2 gap-2">
+            {sizes.map((s) => {
+              const checked = selectedSizes.includes(s);
+              return (
+                <label
+                  key={s}
+                  className={
+                    "flex cursor-pointer items-center justify-center rounded-2xl border px-3 py-2 text-xs font-semibold transition " +
+                    (checked
+                      ? "border-black bg-black text-white"
+                      : "border-black/10 bg-white hover:bg-black/5 text-black/80")
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={checked}
+                    onChange={() => onToggleSize(s)}
+                  />
+                  {s}
+                </label>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[11px] text-black/50">
+            Si no seleccionas talla, se muestran todas.
+          </p>
+        </AccordionSection>
+      )}
 
+      {/* Precio (USD) */}
       <AccordionSection title="Precio (USD)" defaultOpen={false}>
         <div className="grid grid-cols-2 gap-2">
           <div>
@@ -125,7 +142,7 @@ export function FiltersContent({
               max={maxBound}
               value={priceMin}
               onChange={(e) => onPriceMinChange(Number(e.target.value))}
-              className="mt-1 w-full rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/30"
+              className="mt-1 w-full rounded-2xl border border-black/10 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-black/30"
             />
           </div>
           <div>
@@ -136,18 +153,19 @@ export function FiltersContent({
               max={maxBound}
               value={priceMax}
               onChange={(e) => onPriceMaxChange(Number(e.target.value))}
-              className="mt-1 w-full rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/30"
+              className="mt-1 w-full rounded-2xl border border-black/10 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-black/30"
             />
           </div>
         </div>
-        <p className="mt-3 text-xs text-black/50">
-          Rango: {minBound} – {maxBound}
+        <p className="mt-2 text-[11px] text-black/50">
+          Rango disponible: {minBound} USD – {maxBound} USD
         </p>
       </AccordionSection>
 
+      {/* Botón limpiar */}
       <button
         onClick={onClear}
-        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold hover:bg-black/5"
+        className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-xs font-semibold hover:bg-black/5"
       >
         Limpiar filtros
       </button>
@@ -168,10 +186,10 @@ function Chip({
     <button
       onClick={onClick}
       className={
-        "rounded-2xl border px-4 py-2 text-sm font-semibold transition " +
+        "rounded-2xl border px-3.5 py-1.5 text-xs font-semibold transition " +
         (active
           ? "border-black bg-black text-white"
-          : "border-black/10 bg-white hover:bg-black/5")
+          : "border-black/10 bg-white hover:bg-black/5 text-black/80")
       }
     >
       {children}
