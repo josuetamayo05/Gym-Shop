@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal } from "lucide-react";
 
 import { useProducts } from "../entities/product/model/useProducts";
@@ -15,6 +16,10 @@ type Sort = "reco" | "price_asc" | "price_desc" | "name_asc";
 
 export function Catalog() {
   const { products: PRODUCTS, source } = useProducts();
+  const [params, setParams] = useSearchParams();
+
+  // ✅ La categoría se lee directamente de la URL (lo que hace que los chips funcionen)
+  const category = (params.get("category") as CategoryFilter) || "Todos";
 
   const { minBound, maxBound, sizes, productTypes } = useMemo(() => {
     const prices = PRODUCTS.map((p) => p.price);
@@ -23,7 +28,7 @@ export function Catalog() {
 
     const order = ["Único", "XS", "S", "M", "L", "XL", "XXL"];
     const sizesSet = new Set<string>();
-    PRODUCTS.forEach((p) => (p.sizes ?? []).forEach((s) => sizesSet.add(s)));
+    PRODUCTS.forEach((p) => (p.sizes ?? []).forEach((s: string) => sizesSet.add(s)));
 
     const sizes = Array.from(sizesSet).sort((a, b) => {
       const ia = order.indexOf(a);
@@ -42,19 +47,25 @@ export function Catalog() {
   }, [PRODUCTS]);
 
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<CategoryFilter>("Todos");
   const [productType, setProductType] = useState<TypeFilter>("Todos");
   const [sort, setSort] = useState<Sort>("reco");
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   
-  // ✅ Usamos null para saber si el usuario ha tocado los filtros manualmente
   const [userPriceMin, setUserPriceMin] = useState<number | null>(null);
   const [userPriceMax, setUserPriceMax] = useState<number | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // ✅ Precios efectivos derivados en el renderizado (sin useEffect que rompa ESLint)
   const priceMin = userPriceMin ?? minBound;
   const priceMax = userPriceMax ?? maxBound;
+
+  function handleCategoryChange(newCategory: CategoryFilter) {
+    if (newCategory === "Todos") {
+      params.delete("category");
+      setParams(params);
+    } else {
+      setParams({ ...Object.fromEntries(params), category: newCategory });
+    }
+  }
 
   function toggleSize(size: string) {
     setSelectedSizes((prev) =>
@@ -64,12 +75,12 @@ export function Catalog() {
 
   function clearFilters() {
     setQuery("");
-    setCategory("Todos");
     setProductType("Todos");
     setSort("reco");
     setSelectedSizes([]);
     setUserPriceMin(null);
     setUserPriceMax(null);
+    setParams({});
   }
 
   const activeFiltersCount = useMemo(() => {
@@ -97,7 +108,7 @@ export function Catalog() {
       const matchType = productType === "Todos" || p.productType === productType;
       const matchSizes =
         selectedSizes.length === 0 ||
-        (p.sizes ?? []).some((s) => selectedSizes.includes(s));
+        (p.sizes ?? []).some((s: string) => selectedSizes.includes(s));
       const matchPrice = p.price >= min && p.price <= max;
 
       return matchQuery && matchCat && matchType && matchSizes && matchPrice;
@@ -120,29 +131,24 @@ export function Catalog() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
-      {/* HERO BANNER — ANCLADO A LA DERECHA EN MÓVIL */}
+      {/* HERO BANNER — ESTILO GEMINI */}
       <section className="relative mb-6 overflow-hidden rounded-[28px] bg-[#F5F1EA] p-4 sm:p-8 md:p-10 shadow-sm border border-black/5">
-        {/* Imagen fija a la derecha (object-right) */}
         <img
           src="/hero-js-concept.jpg"
           alt="JS CONCEPT"
           className="absolute inset-0 h-full w-full object-cover object-right sm:object-center"
         />
 
-        {/* Texto posicionado a la izquierda */}
         <div className="relative z-10 max-w-[72%] sm:max-w-[58%] md:max-w-[52%] pr-1">
-          {/* TÍTULO */}
           <h1 className="text-lg font-bold tracking-tight text-black leading-[1.12] sm:text-3xl md:text-4xl lg:text-5xl">
             JS CONCEPT — <br />
             <span className="block mt-0.5">Tu Selección de Vida</span>
           </h1>
 
-          {/* SUBTÍTULO */}
           <p className="mt-2 text-[10.5px] leading-relaxed text-black/80 sm:mt-3.5 sm:text-sm md:text-base max-w-sm sm:max-w-md">
             Explora nuestra cuidada selección de moda casual, tecnología de vanguardia, y esenciales para tu día a día. Calidad curada para elevar tu estilo personal.
           </p>
 
-          {/* BOTÓN OLIVA */}
           <div className="mt-3 sm:mt-5">
             <button
               onClick={() => {
@@ -157,8 +163,8 @@ export function Catalog() {
         </div>
       </section>
 
+      {/* BARRA DE BÚSQUEDA Y FILTROS */}
       <section className="mb-5 space-y-3">
-        {/* Buscador */}
         <div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-3 shadow-sm">
           <Search className="h-4 w-4 shrink-0 text-black/40" />
           <input
@@ -169,7 +175,6 @@ export function Catalog() {
           />
         </div>
 
-        {/* Toolbar */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMobileFiltersOpen(true)}
@@ -202,7 +207,7 @@ export function Catalog() {
           <div className="sticky top-24">
             <FiltersContent
               category={category}
-              onCategoryChange={setCategory}
+              onCategoryChange={handleCategoryChange}
               productTypes={productTypes}
               productType={productType}
               onProductTypeChange={setProductType}
@@ -235,7 +240,7 @@ export function Catalog() {
       <MobileFiltersDrawer open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <FiltersContent
           category={category}
-          onCategoryChange={setCategory}
+          onCategoryChange={handleCategoryChange}
           productTypes={productTypes}
           productType={productType}
           onProductTypeChange={setProductType}
