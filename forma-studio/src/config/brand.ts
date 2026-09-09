@@ -1,4 +1,4 @@
 export const BRAND = {
-  name: "GYM STUDIO",
+  name: "JS CONCEPT",
   tagline: "Entrena con intención.",
 };

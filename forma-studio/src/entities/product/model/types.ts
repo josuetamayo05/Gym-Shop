@@ -1,19 +1,33 @@
-export type Category = "Hombre" | "Mujer" | "Accesorios";
+export type Category = 
+  | "Hombre" 
+  | "Mujer" 
+  | "Tecnología" 
+  | "Suplementos" 
+  | "Accesorios" 
+  | "Tendencias";
 
-export type ProductType = "Pulover" | "Short" | "Licra" | "Tops" | "Accesorios" | "Suplementos" | "Otro";
+export type ProductType = 
+  | "Camisetas"
+  | "Pantalones"
+  | "Calzado"
+  | "Audio & Tech"
+  | "Gadgets"
+  | "Suplementos"
+  | "Accesorios"
+  | "Otro";
 
 export type Product = {
   id: string;
   slug: string;
   name: string;
-  category: "Hombre" | "Mujer" | "Accesorios";
+  category: Category;
   productType: string;
   price: number;
   images: string[];
   description?: string;
-  sizes: string[];
-  badge?: "Nuevo" | "Best seller" | "-15%";
+  sizes?: string[];
+  badge?: "Nuevo" | "Best seller" | "Destacado" | "-15%";
   featured?: boolean;
   soldOut?: boolean;
-  active?: boolean; // <- para ocultar productos desde admin
+  active?: boolean;
 };

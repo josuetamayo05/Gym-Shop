@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 
 import { useProducts } from "../entities/product/model/useProducts";
@@ -46,14 +46,15 @@ export function Catalog() {
   const [productType, setProductType] = useState<TypeFilter>("Todos");
   const [sort, setSort] = useState<Sort>("reco");
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [priceMin, setPriceMin] = useState<number>(0);
-  const [priceMax, setPriceMax] = useState<number>(0);
+  
+  // ✅ Usamos null para saber si el usuario ha tocado los filtros manualmente
+  const [userPriceMin, setUserPriceMin] = useState<number | null>(null);
+  const [userPriceMax, setUserPriceMax] = useState<number | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  useEffect(() => {
-    setPriceMin(minBound);
-    setPriceMax(maxBound);
-  }, [minBound, maxBound]);
+  // ✅ Precios efectivos derivados en el renderizado (sin useEffect que rompa ESLint)
+  const priceMin = userPriceMin ?? minBound;
+  const priceMax = userPriceMax ?? maxBound;
 
   function toggleSize(size: string) {
     setSelectedSizes((prev) =>
@@ -67,8 +68,8 @@ export function Catalog() {
     setProductType("Todos");
     setSort("reco");
     setSelectedSizes([]);
-    setPriceMin(minBound);
-    setPriceMax(maxBound);
+    setUserPriceMin(null);
+    setUserPriceMax(null);
   }
 
   const activeFiltersCount = useMemo(() => {
@@ -77,18 +78,9 @@ export function Catalog() {
     if (category !== "Todos") n++;
     if (productType !== "Todos") n++;
     if (selectedSizes.length > 0) n++;
-    if (priceMin !== minBound || priceMax !== maxBound) n++;
+    if (userPriceMin !== null || userPriceMax !== null) n++;
     return n;
-  }, [
-    query,
-    category,
-    productType,
-    selectedSizes.length,
-    priceMin,
-    priceMax,
-    minBound,
-    maxBound,
-  ]);
+  }, [query, category, productType, selectedSizes.length, userPriceMin, userPriceMax]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -121,53 +113,67 @@ export function Catalog() {
   if (source === "loading") {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10">
-        <p className="text-sm text-black/60">Cargando catálogo…</p>
+        <p className="text-sm text-black/60">Cargando colección…</p>
       </main>
     );
   }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
-      <section className="mb-5 rounded-[28px] border border-black/10 bg-[#F7F3EE] p-6">
-        <p className="text-xs uppercase tracking-widest text-black/60">GYM STUDIO</p>
-        <h1 className="mt-2 text-2xl font-semibold leading-tight">
-          Catálogo — ropa, accesorios y más
+      {/* HERO BANNER ESTILO JS CONCEPT */}
+      <section className="mb-6 rounded-[32px] border border-black/5 bg-[#F5F1EA] p-6 md:p-10">
+        <h1 className="text-2xl font-bold tracking-tight text-black md:text-4xl">
+          JS CONCEPT — <br className="sm:hidden" />
+          Tu Selección de Vida
         </h1>
-        <p className="mt-2 text-sm text-black/70">
-          Filtra por categoría y tipo. Agrega al carrito y envía el pedido por WhatsApp.
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-black/70 md:text-base">
+          Explora nuestra cuidada selección de moda casual, tecnología de vanguardia,
+          y esenciales para tu día a día. Calidad curada para elevar tu estilo personal.
         </p>
+
+        <button
+          onClick={() => {
+            const el = document.getElementById("catalog-products");
+            el?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="mt-5 inline-flex items-center rounded-full bg-[#374231] px-6 py-3 text-xs font-semibold tracking-wide text-white transition hover:bg-[#2A3325]"
+        >
+          Explorar la Colección
+        </button>
       </section>
 
+      {/* BUSCADOR */}
       <section className="mb-5 space-y-3">
-        <div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2">
-          <Search className="h-4 w-4 text-black/50" />
+        <div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-3 shadow-sm">
+          <Search className="h-4 w-4 text-black/40" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-sm outline-none placeholder:text-black/40"
-            placeholder="Buscar pulóver, shorts, suplementos…"
+            placeholder="Buscar productos, marcas y tendencias…"
           />
         </div>
 
+        {/* TOOLBAR */}
         <div className="flex items-center justify-between gap-3">
           <button
             onClick={() => setMobileFiltersOpen(true)}
             className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold hover:bg-black/5 lg:hidden"
           >
             <SlidersHorizontal className="h-4 w-4" />
-            Filtros {activeFiltersCount > 0 ? `(${activeFiltersCount})` : ""}
+            FILTROS {activeFiltersCount > 0 ? `(${activeFiltersCount})` : ""}
           </button>
 
-          <p className="text-xs text-black/60">
+          <p className="text-xs font-medium text-black/60">
             {filtered.length} resultados
           </p>
 
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as Sort)}
-            className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm outline-none"
+            className="rounded-2xl border border-black/10 bg-white px-3 py-2 text-xs font-semibold outline-none"
           >
-            <option value="reco">Ordenar: Recomendado</option>
+            <option value="reco">ORDENAR POR: Recomendados</option>
             <option value="price_asc">Precio: menor a mayor</option>
             <option value="price_desc">Precio: mayor a menor</option>
             <option value="name_asc">Nombre: A-Z</option>
@@ -175,7 +181,8 @@ export function Catalog() {
         </div>
       </section>
 
-      <section className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-6">
+      {/* LAYOUT PRINCIPAL */}
+      <section id="catalog-products" className="lg:grid lg:grid-cols-[260px_1fr] lg:gap-6">
         <aside className="hidden lg:block">
           <div className="sticky top-24">
             <FiltersContent
@@ -189,8 +196,8 @@ export function Catalog() {
               onToggleSize={toggleSize}
               priceMin={priceMin}
               priceMax={priceMax}
-              onPriceMinChange={setPriceMin}
-              onPriceMaxChange={setPriceMax}
+              onPriceMinChange={setUserPriceMin}
+              onPriceMaxChange={setUserPriceMax}
               minBound={minBound}
               maxBound={maxBound}
               onClear={clearFilters}
@@ -209,6 +216,7 @@ export function Catalog() {
         </div>
       </section>
 
+      {/* DRAWER MÓVIL */}
       <MobileFiltersDrawer open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <FiltersContent
           category={category}
@@ -221,8 +229,8 @@ export function Catalog() {
           onToggleSize={toggleSize}
           priceMin={priceMin}
           priceMax={priceMax}
-          onPriceMinChange={setPriceMin}
-          onPriceMaxChange={setPriceMax}
+          onPriceMinChange={setUserPriceMin}
+          onPriceMaxChange={setUserPriceMax}
           minBound={minBound}
           maxBound={maxBound}
           onClear={clearFilters}

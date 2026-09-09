@@ -1,52 +1,65 @@
-import { useMemo } from "react";
-import { ShoppingBag, Search } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ShoppingBag } from "lucide-react";
 import { useCartStore } from "../store/cartStore";
 import { useUIStore } from "../store/uiStore";
 
-import logo from "../../public/logo.jpg";
+const QUICK_CATEGORIES = [
+  { label: "LO NUEVO", value: "Todos" },
+  { label: "HOMBRE", value: "Hombre" },
+  { label: "MUJER", value: "Mujer" },
+  { label: "TECNOLOGÍA", value: "Tecnología" },
+  { label: "SUPLEMENTOS", value: "Suplementos" },
+  { label: "TENDENCIAS", value: "Tendencias" },
+];
 
-export function Header() {
+export function Header({ onSelectCategory }: { onSelectCategory?: (cat: string) => void }) {
+  const items = useCartStore((s) => s.items);
   const setCartOpen = useUIStore((s) => s.setCartOpen);
 
-  const itemsMap = useCartStore((s) => s.items);
-  const totalItems = useMemo(
-    () => Object.values(itemsMap).reduce((acc, it) => acc + it.quantity, 0),
-    [itemsMap]
-  );
+  // ✅ Corregido con tipos explícitos para evitar el error TS7006 y TS2349
+  const count = Array.isArray(items)
+    ? items.reduce((acc: number, item: { quantity: number }) => acc + (item.quantity || 1), 0)
+    : 0;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-black/10 bg-white/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <img
-            src={logo}
-            alt="GYM STUDIO"
-            className="h-8 w-8 rounded-xl object-cover"
-          />
-          <span className="text-sm font-semibold tracking-wide">GYM STUDIO</span>
-        </div>
+    <header className="sticky top-0 z-30 border-b border-black/5 bg-[#F7F4EE]/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        {/* LOGO */}
+        <Link to="/" className="flex items-center gap-2">
+          <span className="font-serif text-2xl font-normal tracking-tighter text-black/80">
+            JS
+          </span>
+          <span className="text-base font-bold tracking-tight text-black">
+            JS CONCEPT
+          </span>
+        </Link>
 
-        <div className="ml-auto hidden w-full max-w-md items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2 md:flex">
-          <Search className="h-4 w-4 text-black/50" />
-          <input
-            className="w-full bg-transparent text-sm outline-none placeholder:text-black/40"
-            placeholder="Buscar pulóveres, shorts…"
-          />
-        </div>
-
+        {/* BOTÓN CARRITO */}
         <button
           onClick={() => setCartOpen(true)}
-          className="relative ml-auto inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm font-medium hover:bg-black/5 md:ml-0"
+          className="relative rounded-2xl border border-black/10 bg-white p-2.5 hover:bg-black/5"
+          aria-label="Abrir carrito"
         >
-          <ShoppingBag className="h-4 w-4" />
-          <span className="hidden sm:block">Carrito</span>
-
-          {totalItems > 0 && (
-            <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#D8C3A5] px-1 text-xs font-semibold text-black">
-              {totalItems}
+          <ShoppingBag className="h-5 w-5 text-black" />
+          {count > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#394432] text-[11px] font-bold text-white">
+              {count}
             </span>
           )}
         </button>
+      </div>
+
+      {/* CHIPS DE NAVEGACIÓN RÁPIDA */}
+      <div className="no-scrollbar flex gap-1 overflow-x-auto px-4 pb-2 pt-1">
+        {QUICK_CATEGORIES.map((cat) => (
+          <button
+            key={cat.label}
+            onClick={() => onSelectCategory?.(cat.value)}
+            className="shrink-0 rounded-full border border-black/10 bg-white px-3.5 py-1 text-[11px] font-semibold tracking-wider text-black/80 hover:bg-black/5"
+          >
+            {cat.label}
+          </button>
+        ))}
       </div>
     </header>
   );

@@ -1,13 +1,21 @@
-export const CATEGORIES = ["Hombre", "Mujer", "Accesorios"] as const;
-
-export const PRODUCT_TYPES = [
-  "Pulover",
-  "Short",
-  "Licra",
-  "Tops",
-  "Accesorios",
+export const CATEGORIES = [
+  "Hombre",
+  "Mujer",
+  "Tecnología",
   "Suplementos",
+  "Accesorios",
+  "Tendencias",
 ] as const;
 
-// tallas fijas (edítalas aquí si quieres)
+export const PRODUCT_TYPES = [
+  "Camisetas",
+  "Pantalones",
+  "Calzado",
+  "Audio & Tech",
+  "Gadgets",
+  "Suplementos",
+  "Accesorios",
+  "Otro",
+] as const;
+
 export const SIZES = ["Único", "XS", "S", "M", "L", "XL", "XXL"] as const;
