@@ -120,45 +120,39 @@ export function Catalog() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
-      {/* HERO BANNER — OPTIMIZADO PARA MÓVIL Y DESKTOP */}
-      <section className="relative mb-6 overflow-hidden rounded-[28px] border border-black/5 bg-[#F5F1EA] shadow-sm md:rounded-[36px]">
-        <div className="relative flex min-h-[290px] w-full flex-col justify-center p-5 sm:aspect-[16/9] sm:min-h-[340px] sm:p-8 md:p-12">
-          {/* Imagen de fondo */}
-          <img
-            src="/hero-js-concept.jpg"
-            alt="JS CONCEPT"
-            className="absolute inset-0 h-full w-full object-cover object-right sm:object-center"
-          />
+      {/* HERO BANNER — IDÉNTICO A LA FOTO DE GEMINI */}
+      <section className="relative mb-6 overflow-hidden rounded-[28px] bg-[#F5F1EA] p-5 sm:p-8 md:p-10 shadow-sm border border-black/5">
+        {/* Imagen limpia de Gemini sin capas ni filtros CSS encima */}
+        <img
+          src="/hero-js-concept.jpg"
+          alt="JS CONCEPT"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
 
-          {/* Degradado suave para asegurar lectura sin tapar los productos de la derecha */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#F5F1EA] via-[#F5F1EA]/95 to-transparent via-75% sm:via-60%" />
+        {/* Texto posicionado sobre la zona crema de la imagen */}
+        <div className="relative z-10 max-w-[65%] sm:max-w-[58%] md:max-w-[52%]">
+          {/* TÍTULO */}
+          <h1 className="text-xl font-bold tracking-tight text-black leading-[1.12] sm:text-3xl md:text-4xl lg:text-5xl">
+            JS CONCEPT — <br />
+            <span className="block mt-0.5">Tu Selección de Vida</span>
+          </h1>
 
-          {/* Contenido con jerarquía corregida */}
-          <div className="relative z-10 max-w-[88%] sm:max-w-[62%] md:max-w-[55%]">
-            {/* 1. TÍTULO PRINCIPAL (Bien arriba y visible) */}
-            <h1 className="text-xl font-bold tracking-tight text-black leading-tight sm:text-3xl md:text-5xl lg:text-6xl">
-              JS CONCEPT — <br />
-              <span className="block mt-0.5">Tu Selección de Vida</span>
-            </h1>
+          {/* SUBTÍTULO */}
+          <p className="mt-2.5 text-[11px] leading-relaxed text-black/80 sm:mt-3.5 sm:text-sm md:text-base max-w-sm sm:max-w-md">
+            Explora nuestra cuidada selección de moda casual, tecnología de vanguardia, y esenciales para tu día a día. Calidad curada para elevar tu estilo personal.
+          </p>
 
-            {/* 2. PÁRRAFO (Más abajo con espacio respirable) */}
-            <p className="mt-3 text-[11px] leading-relaxed text-black/75 sm:mt-4 sm:text-sm md:text-base lg:text-lg">
-              Explora nuestra cuidada selección de moda casual, tecnología de vanguardia,
-              y esenciales para tu día a día. Calidad curada para elevar tu estilo personal.
-            </p>
-
-            {/* 3. BOTÓN OLIVA (Al final) */}
-            <div className="mt-4 sm:mt-6">
-              <button
-                onClick={() => {
-                  const el = document.getElementById("catalog-products");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="inline-flex items-center rounded-full bg-[#394432] px-5 py-2.5 sm:px-7 sm:py-3.5 text-xs sm:text-sm font-semibold tracking-wide text-white shadow-sm transition hover:bg-[#2A3325] active:scale-95"
-              >
-                Explorar la Colección
-              </button>
-            </div>
+          {/* BOTÓN OLIVA */}
+          <div className="mt-4 sm:mt-5">
+            <button
+              onClick={() => {
+                const el = document.getElementById("catalog-products");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="inline-flex items-center rounded-full bg-[#384232] px-4 py-2 sm:px-5 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-white transition hover:bg-[#2B3227] active:scale-95"
+            >
+              Explorar la Colección
+            </button>
           </div>
         </div>
       </section>
