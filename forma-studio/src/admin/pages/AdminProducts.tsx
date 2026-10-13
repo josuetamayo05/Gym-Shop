@@ -76,6 +76,32 @@ export function AdminProducts() {
     return () => unsubscribe();
   }, []);
 
+    // ✅ Auto-normalizar displayOrder cuando se detecten valores duplicados o faltantes
+  useEffect(() => {
+    if (loading || products.length === 0) return;
+
+    const orders = products.map((p) => p.displayOrder);
+    const hasUndefined = orders.some((o) => o == null);
+    const hasDuplicates = new Set(orders).size !== orders.length;
+
+    if (hasUndefined || hasDuplicates) {
+      console.log("⚙️ Normalizando displayOrder de productos...");
+      const sorted = [...products].sort((a, b) => {
+        const aOrder = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
+        const bOrder = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
+        return aOrder - bOrder;
+      });
+
+      Promise.all(
+        sorted.map((p, idx) =>
+          updateDoc(doc(db, "products", p.id), {
+            displayOrder: (idx + 1) * 1000, // dejamos huecos de 1000 entre cada uno
+          })
+        )
+      ).catch((err) => console.error("Error normalizando:", err));
+    }
+  }, [loading, products]);
+
   // Lista completa ordenada (para reordenamiento real)
   const sortedProducts = [...products].sort(
     (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)
@@ -156,8 +182,7 @@ export function AdminProducts() {
     }
   };
 
-  // ✅ ARREGLO: usar siempre la lista COMPLETA ordenada para el reordenamiento
-  const handleMove = async (product: Product, direction: "up" | "down") => {
+    const handleMove = async (product: Product, direction: "up" | "down") => {
     if (hasActiveFilters) {
       alert(
         "⚠️ Quita los filtros antes de reordenar para evitar errores de orden."
@@ -166,28 +191,46 @@ export function AdminProducts() {
     }
 
     const currentIndex = sortedProducts.findIndex((p) => p.id === product.id);
-    const targetIndex =
-      direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex < 0 || targetIndex >= sortedProducts.length) return;
+      if (currentIndex === -1) return;
 
-    const currentItem = sortedProducts[currentIndex];
-    const targetItem = sortedProducts[targetIndex];
+      const targetIndex =
+        direction === "up" ? currentIndex - 1 : currentIndex + 1;
+      if (targetIndex < 0 || targetIndex >= sortedProducts.length) return;
 
-    try {
-      await Promise.all([
-        updateDoc(doc(db, "products", currentItem.id), {
-          displayOrder: targetItem.displayOrder ?? targetIndex,
+      const currentItem = sortedProducts[currentIndex];
+      const targetItem = sortedProducts[targetIndex];
+
+      // ✅ Validación: si por alguna razón tienen el mismo displayOrder, los diferenciamos
+      const currentOrder = currentItem.displayOrder ?? 0;
+      const targetOrder = targetItem.displayOrder ?? 0;
+
+      if (currentOrder === targetOrder) {
+        console.warn("displayOrder duplicado, forzando valores distintos");
+        // El que sube recibe uno menor, el otro queda igual
+        const newOrder =
+          direction === "up" ? targetOrder - 1 : targetOrder + 1;
+        await updateDoc(doc(db, "products", currentItem.id), {
+          displayOrder: newOrder,
           updatedAt: nowMs(),
-        }),
-        updateDoc(doc(db, "products", targetItem.id), {
-          displayOrder: currentItem.displayOrder ?? currentIndex,
-          updatedAt: nowMs(),
-        }),
-      ]);
-    } catch (error) {
-      console.error("Error al reordenar:", error);
-    }
-  };
+        });
+        return;
+      }
+
+      try {
+        await Promise.all([
+          updateDoc(doc(db, "products", currentItem.id), {
+            displayOrder: targetOrder,
+            updatedAt: nowMs(),
+          }),
+          updateDoc(doc(db, "products", targetItem.id), {
+            displayOrder: currentOrder,
+            updatedAt: nowMs(),
+          }),
+        ]);
+      } catch (error) {
+        console.error("Error al reordenar:", error);
+      }
+    };
 
   return (
     <div className="min-h-screen bg-[#0B0E14] text-slate-100 px-4 sm:px-6 py-6 pb-28">
