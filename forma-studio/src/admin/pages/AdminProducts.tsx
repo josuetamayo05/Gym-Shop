@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   collection,
   onSnapshot,
@@ -6,344 +7,434 @@ import {
   updateDoc,
   deleteDoc,
   addDoc,
-  type DocumentData,
 } from "firebase/firestore";
 import { db } from "../../firebase";
-import { Link } from "react-router-dom";
+import { CATEGORIES } from "../constants";
 import { nowMs } from "../now";
+import {
+  Plus,
+  Search,
+  ArrowUp,
+  ArrowDown,
+  Edit3,
+  Copy,
+  Trash2,
+  Package,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 
-/* ---------- tipos ---------- */
-type ProductDoc = {
+interface ColorOption {
+  name: string;
+  hex: string;
+}
+
+interface Product {
+  id: string;
   name: string;
   slug: string;
-  price: number;
-  active: boolean;
-  soldOut: boolean;
   category: string;
   productType: string;
+  price: number;
+  description: string;
+  sizes: string[];
+  colors: ColorOption[];
+  active: boolean;
+  soldOut: boolean;
   images: string[];
   displayOrder: number;
-  updatedAt?: number;
-};
+  createdAt: number;
+  updatedAt: number;
+}
 
-type ProductRow = ProductDoc & { id: string };
-
-/* ---------- componente ---------- */
 export function AdminProducts() {
-  const [items, setItems] = useState<ProductRow[]>([]);
-  const [search, setSearch] = useState("");
-  const [filterCategory, setFilterCategory] = useState("Todas");
-  const [filterStatus, setFilterStatus] = useState<"todos" | "activos" | "ocultos" | "agotados">("todos");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("Todos");
+  const [statusFilter, setStatusFilter] = useState<
+    "todos" | "activos" | "agotados" | "ocultos"
+  >("todos");
 
-  /* --- cargar productos en tiempo real --- */
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "products"), (snap) => {
-      const rows: ProductRow[] = snap.docs.map((d) => {
-        const data = d.data() as DocumentData as ProductDoc;
-        return {
-          id: d.id,
-          ...data,
-          soldOut: data.soldOut ?? false,
-          active: data.active ?? true,
-          images: data.images ?? [],
-          displayOrder: data.displayOrder ?? 0,
-        };
-      });
-      setItems(rows);
-    });
-    return unsub;
+    const unsubscribe = onSnapshot(
+      collection(db, "products"),
+      (snapshot) => {
+        const items = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        })) as Product[];
+        setProducts(items);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error al obtener productos:", error);
+        setLoading(false);
+      }
+    );
+    return () => unsubscribe();
   }, []);
 
-  /* --- productos ordenados y filtrados --- */
-  const filtered = useMemo(() => {
-    let list = [...items];
+  // Lista completa ordenada (para reordenamiento real)
+  const sortedProducts = [...products].sort(
+    (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)
+  );
 
-    // Ordenar por displayOrder (menor = primero)
-    list.sort((a, b) => a.displayOrder - b.displayOrder);
+  // Lista filtrada (para mostrar)
+  const filteredProducts = sortedProducts.filter((p) => {
+    const matchesSearch = p.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "Todos" || p.category === selectedCategory;
 
-    // Buscar por nombre
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter((p) => p.name.toLowerCase().includes(q));
+    let matchesStatus = true;
+    if (statusFilter === "activos") matchesStatus = p.active && !p.soldOut;
+    if (statusFilter === "agotados") matchesStatus = p.soldOut;
+    if (statusFilter === "ocultos") matchesStatus = !p.active;
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
+
+  const hasActiveFilters =
+    searchQuery !== "" ||
+    selectedCategory !== "Todos" ||
+    statusFilter !== "todos";
+
+  const totalCount = products.length;
+  const activeCount = products.filter((p) => p.active && !p.soldOut).length;
+  const soldOutCount = products.filter((p) => p.soldOut).length;
+  const hiddenCount = products.filter((p) => !p.active).length;
+
+  const handleToggleActive = async (product: Product) => {
+    try {
+      await updateDoc(doc(db, "products", product.id), {
+        active: !product.active,
+        updatedAt: nowMs(),
+      });
+    } catch (error) {
+      console.error("Error al actualizar:", error);
+    }
+  };
+
+  const handleToggleSoldOut = async (product: Product) => {
+    try {
+      await updateDoc(doc(db, "products", product.id), {
+        soldOut: !product.soldOut,
+        updatedAt: nowMs(),
+      });
+    } catch (error) {
+      console.error("Error al actualizar:", error);
+    }
+  };
+
+  const handleDuplicate = async (product: Product) => {
+    try {
+      const { ...productData } = product;
+      await addDoc(collection(db, "products"), {
+        ...productData,
+        name: `${product.name} (Copia)`,
+        slug: `${product.slug}-copia-${nowMs().toString().slice(-4)}`,
+        active: false,
+        createdAt: nowMs(),
+        updatedAt: nowMs(),
+        displayOrder: nowMs(),
+      });
+    } catch (error) {
+      console.error("Error al duplicar:", error);
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (window.confirm(`¿Eliminar el producto "${name}"?`)) {
+      try {
+        await deleteDoc(doc(db, "products", id));
+      } catch (error) {
+        console.error("Error al eliminar:", error);
+      }
+    }
+  };
+
+  // ✅ ARREGLO: usar siempre la lista COMPLETA ordenada para el reordenamiento
+  const handleMove = async (product: Product, direction: "up" | "down") => {
+    if (hasActiveFilters) {
+      alert(
+        "⚠️ Quita los filtros antes de reordenar para evitar errores de orden."
+      );
+      return;
     }
 
-    // Filtrar por categoría
-    if (filterCategory !== "Todas") {
-      list = list.filter((p) => p.category === filterCategory);
+    const currentIndex = sortedProducts.findIndex((p) => p.id === product.id);
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= sortedProducts.length) return;
+
+    const currentItem = sortedProducts[currentIndex];
+    const targetItem = sortedProducts[targetIndex];
+
+    try {
+      await Promise.all([
+        updateDoc(doc(db, "products", currentItem.id), {
+          displayOrder: targetItem.displayOrder ?? targetIndex,
+          updatedAt: nowMs(),
+        }),
+        updateDoc(doc(db, "products", targetItem.id), {
+          displayOrder: currentItem.displayOrder ?? currentIndex,
+          updatedAt: nowMs(),
+        }),
+      ]);
+    } catch (error) {
+      console.error("Error al reordenar:", error);
     }
+  };
 
-    // Filtrar por estado
-    if (filterStatus === "activos") list = list.filter((p) => p.active && !p.soldOut);
-    if (filterStatus === "ocultos") list = list.filter((p) => !p.active);
-    if (filterStatus === "agotados") list = list.filter((p) => p.soldOut);
-
-    return list;
-  }, [items, search, filterCategory, filterStatus]);
-
-  // Categorías únicas para el filtro
-  const categories = useMemo(() => {
-    const cats = new Set(items.map((p) => p.category));
-    return ["Todas", ...Array.from(cats)];
-  }, [items]);
-
-  // Estadísticas
-  const stats = useMemo(() => ({
-    total: items.length,
-    active: items.filter((p) => p.active && !p.soldOut).length,
-    soldOut: items.filter((p) => p.soldOut).length,
-    hidden: items.filter((p) => !p.active).length,
-  }), [items]);
-
-  /* --- acciones --- */
-  async function toggleActive(p: ProductRow) {
-    await updateDoc(doc(db, "products", p.id), {
-      active: !p.active,
-      updatedAt: nowMs(),
-    });
-  }
-
-  async function toggleSoldOut(p: ProductRow) {
-    await updateDoc(doc(db, "products", p.id), {
-      soldOut: !p.soldOut,
-      updatedAt: nowMs(),
-    });
-  }
-
-  async function deleteProduct(p: ProductRow) {
-    if (!window.confirm(`¿Eliminar "${p.name}"? Esta acción no se puede deshacer.`)) return;
-    await deleteDoc(doc(db, "products", p.id));
-  }
-
-  async function duplicateProduct(p: ProductRow) {
-    const { ...data } = p;
-    await addDoc(collection(db, "products"), {
-      ...data,
-      name: `${p.name} (copia)`,
-      slug: `${p.slug}-copia-${Date.now()}`,
-      active: false,
-      displayOrder: Date.now(),
-      createdAt: nowMs(),
-      updatedAt: nowMs(),
-    });
-  }
-
-  async function moveProduct(p: ProductRow, direction: "up" | "down") {
-    // La lista ya está ordenada por displayOrder
-    const sorted = [...items].sort((a, b) => a.displayOrder - b.displayOrder);
-    const idx = sorted.findIndex((x) => x.id === p.id);
-    if (idx < 0) return;
-
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    if (swapIdx < 0 || swapIdx >= sorted.length) return;
-
-    const neighbor = sorted[swapIdx];
-
-    // Intercambiar displayOrder
-    await Promise.all([
-      updateDoc(doc(db, "products", p.id), { displayOrder: neighbor.displayOrder, updatedAt: nowMs() }),
-      updateDoc(doc(db, "products", neighbor.id), { displayOrder: p.displayOrder, updatedAt: nowMs() }),
-    ]);
-  }
-
-  /* --- render --- */
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold">Admin — Productos</h1>
+    <div className="min-h-screen bg-[#0B0E14] text-slate-100 px-4 sm:px-6 py-6 pb-28">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            Catálogo de Productos
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Administra tu inventario y visualización en tienda.
+          </p>
+        </div>
         <Link
           to="/admin/products/new"
-          className="rounded-2xl bg-black px-5 py-2.5 text-sm font-semibold text-white text-center"
+          className="flex items-center justify-center gap-2 bg-[#D8C3A5] text-slate-900 font-semibold px-5 py-3 rounded-2xl min-h-[48px] shadow-lg shadow-[#D8C3A5]/10 active:scale-95 transition-all"
         >
-          + Nuevo Producto
+          <Plus size={20} />
+          <span>Nuevo Producto</span>
         </Link>
       </div>
 
-      {/* Stats */}
-      <div className="mt-4 grid grid-cols-4 gap-2">
-        {[
-          { label: "Total", value: stats.total, color: "bg-black text-white" },
-          { label: "Activos", value: stats.active, color: "bg-green-100 text-green-700" },
-          { label: "Agotados", value: stats.soldOut, color: "bg-red-100 text-red-700" },
-          { label: "Ocultos", value: stats.hidden, color: "bg-gray-100 text-gray-600" },
-        ].map((s) => (
-          <div key={s.label} className={`rounded-2xl p-3 text-center ${s.color}`}>
-            <p className="text-lg font-bold">{s.value}</p>
-            <p className="text-[10px] font-semibold uppercase tracking-wider opacity-70">{s.label}</p>
+      {/* ESTADÍSTICAS */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div className="bg-[#151A23] border border-white/5 p-4 rounded-2xl flex items-center gap-3">
+          <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl">
+            <Package size={22} />
           </div>
-        ))}
-      </div>
-
-      {/* Buscador y Filtros */}
-      <div className="mt-4 space-y-2">
-        <input
-          type="text"
-          placeholder="🔍  Buscar producto por nombre…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-2xl border border-black/10 px-4 py-2.5 text-sm outline-none focus:border-black/30"
-        />
-
-        <div className="flex flex-wrap gap-2">
-          {/* Filtro categoría */}
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="rounded-xl border border-black/10 px-3 py-1.5 text-xs font-semibold outline-none"
-          >
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-
-          {/* Filtro estado */}
-          {(["todos", "activos", "agotados", "ocultos"] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setFilterStatus(s)}
-              className={`rounded-xl px-3 py-1.5 text-xs font-semibold capitalize ${
-                filterStatus === s
-                  ? "bg-black text-white"
-                  : "border border-black/10 hover:bg-black/5"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Total</p>
+            <p className="text-xl font-bold text-white">{totalCount}</p>
+          </div>
+        </div>
+        <div className="bg-[#151A23] border border-white/5 p-4 rounded-2xl flex items-center gap-3">
+          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
+            <CheckCircle2 size={22} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Activos</p>
+            <p className="text-xl font-bold text-white">{activeCount}</p>
+          </div>
+        </div>
+        <div className="bg-[#151A23] border border-white/5 p-4 rounded-2xl flex items-center gap-3">
+          <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
+            <AlertCircle size={22} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Agotados</p>
+            <p className="text-xl font-bold text-white">{soldOutCount}</p>
+          </div>
+        </div>
+        <div className="bg-[#151A23] border border-white/5 p-4 rounded-2xl flex items-center gap-3">
+          <div className="p-3 bg-rose-500/10 text-rose-400 rounded-xl">
+            <XCircle size={22} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Ocultos</p>
+            <p className="text-xl font-bold text-white">{hiddenCount}</p>
+          </div>
         </div>
       </div>
 
-      {/* Lista de productos */}
-      <div className="mt-4 space-y-2">
-        {filtered.length === 0 && (
-          <p className="py-10 text-center text-sm text-black/40">
-            No se encontraron productos.
-          </p>
-        )}
+      {/* FILTROS */}
+      <div className="bg-[#151A23] border border-white/5 p-4 rounded-3xl mb-6 space-y-4">
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              size={18}
+            />
+            <input
+              type="text"
+              placeholder="Buscar producto por nombre..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#0B0E14] border border-white/10 rounded-2xl pl-11 pr-4 py-3 min-h-[48px] text-white placeholder-slate-500 focus:outline-none focus:border-[#D8C3A5]"
+            />
+          </div>
+          <div className="w-full md:w-64">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full bg-[#0B0E14] border border-white/10 rounded-2xl px-4 py-3 min-h-[48px] text-white focus:outline-none focus:border-[#D8C3A5]"
+            >
+              <option value="Todos">Todas las categorías</option>
+              {CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-        {filtered.map((p, idx) => (
-          <div
-            key={p.id}
-            className="flex items-center gap-3 rounded-2xl border border-black/10 bg-white p-3 transition-shadow hover:shadow-md"
-          >
-            {/* Posición */}
-            <span className="hidden sm:flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black/5 text-[10px] font-bold text-black/40">
-              {idx + 1}
-            </span>
-
-            {/* Thumbnail */}
-            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-black/5">
-              {p.images?.[0] ? (
-                <img
-                  src={p.images[0]}
-                  alt={p.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-[10px] text-black/30">
-                  Sin foto
-                </div>
-              )}
-            </div>
-
-            {/* Info */}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{p.name}</p>
-              <p className="text-xs text-black/50">
-                {p.category} · {p.productType} · ${p.price}
-                {p.images?.length > 0 && (
-                  <span className="ml-1">· 📷{p.images.length}</span>
-                )}
-              </p>
-              <div className="mt-0.5 flex gap-1">
-                {!p.active && (
-                  <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold text-gray-500">OCULTO</span>
-                )}
-                {p.soldOut && (
-                  <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[9px] font-bold text-red-600">AGOTADO</span>
-                )}
-                {p.active && !p.soldOut && (
-                  <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[9px] font-bold text-green-600">ACTIVO</span>
-                )}
-              </div>
-            </div>
-
-            {/* Acciones */}
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
-              {/* Reordenar */}
-              <div className="flex flex-col gap-0.5">
-                <button
-                  onClick={() => moveProduct(p, "up")}
-                  disabled={idx === 0}
-                  title="Mover arriba"
-                  className="rounded-lg border border-black/10 px-1.5 py-0.5 text-[10px] hover:bg-black/5 disabled:opacity-20"
-                >
-                  ↑
-                </button>
-                <button
-                  onClick={() => moveProduct(p, "down")}
-                  disabled={idx === filtered.length - 1}
-                  title="Mover abajo"
-                  className="rounded-lg border border-black/10 px-1.5 py-0.5 text-[10px] hover:bg-black/5 disabled:opacity-20"
-                >
-                  ↓
-                </button>
-              </div>
-
-              {/* Toggle agotado */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          {(["todos", "activos", "agotados", "ocultos"] as const).map(
+            (status) => (
               <button
-                onClick={() => toggleSoldOut(p)}
-                className={`rounded-xl px-2 py-1.5 text-[10px] font-semibold ${
-                  p.soldOut
-                    ? "bg-red-50 text-red-600 hover:bg-red-100"
-                    : "border border-black/10 hover:bg-black/5"
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold capitalize whitespace-nowrap transition-all min-h-[38px] ${
+                  statusFilter === status
+                    ? "bg-[#D8C3A5] text-slate-900"
+                    : "bg-[#0B0E14] text-slate-400 border border-white/5 hover:text-white"
                 }`}
               >
-                {p.soldOut ? "Reponer" : "Agotar"}
+                {status}
               </button>
+            )
+          )}
+        </div>
 
-              {/* Toggle activo */}
-              <button
-                onClick={() => toggleActive(p)}
-                className="rounded-xl border border-black/10 px-2 py-1.5 text-[10px] font-semibold hover:bg-black/5"
-              >
-                {p.active ? "Ocultar" : "Activar"}
-              </button>
-
-              {/* Duplicar */}
-              <button
-                onClick={() => duplicateProduct(p)}
-                title="Duplicar producto"
-                className="rounded-xl border border-black/10 px-2 py-1.5 text-[10px] font-semibold hover:bg-blue-50 hover:text-blue-600"
-              >
-                📋
-              </button>
-
-              {/* Editar */}
-              <Link
-                to={`/admin/products/${p.id}`}
-                className="rounded-xl bg-[#D8C3A5] px-3 py-1.5 text-[10px] font-semibold text-black"
-              >
-                Editar
-              </Link>
-
-              {/* Eliminar */}
-              <button
-                onClick={() => deleteProduct(p)}
-                title="Eliminar producto"
-                className="rounded-xl border border-red-200 px-2 py-1.5 text-[10px] font-semibold text-red-500 hover:bg-red-50"
-              >
-                🗑️
-              </button>
-            </div>
+        {/* Aviso cuando hay filtros activos */}
+        {hasActiveFilters && (
+          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs p-2.5 rounded-xl">
+            ⚠️ Para reordenar productos, primero quita los filtros activos.
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Info del orden */}
-      <p className="mt-4 text-center text-[10px] text-black/30">
-        💡 Usa las flechas ↑ ↓ para cambiar el orden en que los clientes ven los productos.
-      </p>
-    </main>
+      {/* LISTA */}
+      {loading ? (
+        <div className="text-center py-20 text-slate-500">
+          Cargando catálogo...
+        </div>
+      ) : filteredProducts.length === 0 ? (
+        <div className="text-center py-20 bg-[#151A23] border border-white/5 rounded-3xl">
+          <Package size={48} className="mx-auto text-slate-600 mb-3" />
+          <p className="text-slate-400 font-medium">
+            No se encontraron productos
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredProducts.map((product) => {
+            const coverImage =
+              product.images?.[0] || "https://placehold.co/150?text=Sin+Foto";
+            const positionInSorted = sortedProducts.findIndex(
+              (p) => p.id === product.id
+            );
+            const isFirst = positionInSorted === 0;
+            const isLast = positionInSorted === sortedProducts.length - 1;
+
+            return (
+              <div
+                key={product.id}
+                className="bg-[#151A23] border border-white/5 rounded-3xl p-4 flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={coverImage}
+                      alt={product.name}
+                      className="w-16 h-16 rounded-2xl object-cover bg-slate-800 shrink-0 border border-white/10"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-base font-bold text-white truncate">
+                          {product.name}
+                        </h3>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => handleMove(product, "up")}
+                            disabled={isFirst || hasActiveFilters}
+                            className="w-11 h-11 bg-[#0B0E14] border border-white/10 rounded-xl flex items-center justify-center text-slate-300 disabled:opacity-20 disabled:cursor-not-allowed active:bg-white/10"
+                          >
+                            <ArrowUp size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleMove(product, "down")}
+                            disabled={isLast || hasActiveFilters}
+                            className="w-11 h-11 bg-[#0B0E14] border border-white/10 rounded-xl flex items-center justify-center text-slate-300 disabled:opacity-20 disabled:cursor-not-allowed active:bg-white/10"
+                          >
+                            <ArrowDown size={18} />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-sm font-semibold text-[#D8C3A5] mt-0.5">
+                        ${product.price?.toFixed(2) ?? "0.00"} USD
+                      </p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {product.category} • {product.productType}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-4 flex-wrap">
+                    <span
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                        product.active
+                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                      }`}
+                    >
+                      {product.active ? "Activo" : "Oculto"}
+                    </span>
+                    <span
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                        product.soldOut
+                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                          : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                      }`}
+                    >
+                      {product.soldOut ? "Agotado" : "Disponible"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-white/5">
+                  <Link
+                    to={`/admin/products/${product.id}`}
+                    className="flex-1 min-w-[90px] min-h-[44px] bg-[#D8C3A5] text-slate-900 font-semibold rounded-xl flex items-center justify-center gap-1.5 px-3 text-xs active:scale-95 transition-all"
+                  >
+                    <Edit3 size={15} /> Editar
+                  </Link>
+                  <button
+                    onClick={() => handleToggleSoldOut(product)}
+                    className="min-h-[44px] px-3 bg-[#0B0E14] border border-white/10 rounded-xl text-xs font-medium text-slate-300 active:bg-white/5"
+                  >
+                    {product.soldOut ? "Reponer" : "Agotar"}
+                  </button>
+                  <button
+                    onClick={() => handleToggleActive(product)}
+                    className="min-h-[44px] px-3 bg-[#0B0E14] border border-white/10 rounded-xl text-xs font-medium text-slate-300 active:bg-white/5"
+                  >
+                    {product.active ? "Ocultar" : "Activar"}
+                  </button>
+                  <button
+                    onClick={() => handleDuplicate(product)}
+                    className="w-11 h-11 bg-[#0B0E14] border border-white/10 rounded-xl flex items-center justify-center text-slate-300 active:bg-white/5"
+                    title="Duplicar"
+                  >
+                    <Copy size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product.id, product.name)}
+                    className="w-11 h-11 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center justify-center text-rose-400 active:bg-rose-500/20"
+                    title="Eliminar"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
