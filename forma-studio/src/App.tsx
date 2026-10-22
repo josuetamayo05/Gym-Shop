@@ -14,7 +14,7 @@ import { AdminLogin } from "./admin/pages/AdminLogin";
 import { AdminProducts } from "./admin/pages/AdminProducts";
 import { AdminProductEdit } from "./admin/pages/AdminProductEdit";
 import { RequireAdmin } from "./admin/RequireAdmin";
-import { AdminSeed } from "./admin/pages/AdminSeed";
+import { AdminImport } from "./admin/pages/AdminImport";
 
 // ...
 
@@ -34,8 +34,9 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/products" element={<RequireAdmin><AdminProducts /></RequireAdmin>} />
         <Route path="/admin/products/new" element={<RequireAdmin><AdminProductEdit /></RequireAdmin>} />
-        <Route path="/admin/seed" element={<RequireAdmin><AdminSeed /></RequireAdmin>} />
+        <Route path="/admin/import" element={<RequireAdmin><AdminImport /></RequireAdmin>} />
         <Route path="/admin/products/:id" element={<RequireAdmin><AdminProductEdit /></RequireAdmin>} />
+        
       </Routes>
 
       <CartDrawer />

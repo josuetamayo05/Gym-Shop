@@ -56,6 +56,6 @@ export function buildWhatsAppMessagePro(items: CartItem[], opts?: { note?: strin
 }
 
 export function buildWhatsAppLink(phone: string, message: string) {
-  const cleanPhone = phone.replace(/[^\d]/g, "");
-  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+  //const cleanPhone = phone.replace(/[^\d]/g, "");
+  return `https://wa.me/${5350121476}?text=${encodeURIComponent(message)}`;
 }
