@@ -7,7 +7,7 @@ import { useCartStore } from "../store/cartStore";
 import { formatMoney } from "../utils/money";
 import { buildWhatsAppLink, buildWhatsAppMessagePro, generateOrderId } from "../utils/whatsapp";
 
-const PHONE = (import.meta.env.VITE_WHATSAPP_PHONE as string | undefined) ?? "";
+const PHONE = "5350121476";
 
 export function CartDrawer() {
   const cartOpen = useUIStore((s) => s.cartOpen);
